@@ -1,0 +1,14 @@
+{
+  "layout": {
+    "products": "Products",
+    "categories": "Categories",
+    "articles": "Articles",
+    "contacts": "Contacts",
+    "admins": "Admins",
+    "settings": "Settings",
+    "profile": "Profile",
+    "password": "Password",
+    "email": "Email",
+    "signOut": "Sign Out"
+  }
+}
