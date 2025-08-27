@@ -1,19 +1,19 @@
 "use client";
-import React, { useState, useRef, useMemo, use } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 const JoditEditor = dynamic(() => import("jodit-react"), {
   ssr: false,
   loading: () => <p>Loading editor...</p>,
 });
 import { nanoid } from "nanoid";
-import { db } from "@/configuration/firebase-config";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from "react-toastify";
+import { useTranslations, useLocale } from "next-intl";
 
-export default function AddArticle({ params }) {
-  const { lang } = use(params);
+export default function AddArticle() {
+  const locale = useLocale();
+  const t = useTranslations("addArticle");
 
-  const [activeLang, setActiveLang] = useState(lang || "en");
+  const [activeLang, setActiveLang] = useState(locale || "en");
   const [article, setArticle] = useState({
     image: null,
     title: { en: "", ar: "" },
@@ -34,38 +34,9 @@ export default function AddArticle({ params }) {
     [activeLang]
   );
 
-  const labels = {
-    en: {
-      addArticle: "Add Article",
-      langSelect: "Select Content Language",
-      image: "Article Image",
-      title: "Title",
-      description: "Description",
-      add: "Add",
-      adding: "Adding...",
-      change: "Change",
-    },
-    ar: {
-      addArticle: "إضافة مقالة",
-      langSelect: "اختر لغة المحتوى",
-      image: "صورة المقالة",
-      title: "العنوان",
-      description: "وَصْف",
-      add: "إضافة",
-      adding: "جارٍ الإضافة...",
-      change: "تغيير",
-    },
-  };
-
-  const ui = labels[lang] || labels["en"];
-
   const handleChange = (field, value) => {
     if (field === "title" && value.includes("_")) {
-      setError(
-        activeLang === "ar"
-          ? "الشرطة السفلية غير مسموح بها في العنوان."
-          : "Underscores are not allowed in the title."
-      );
+      setError(t("noUnderscores"));
       return;
     } else {
       setError("");
@@ -100,22 +71,21 @@ export default function AddArticle({ params }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      setLoading(true);
       if (!article.image) {
-        toast.error(
-          lang === "ar" ? "الرجاء إضافة صورة." : "Please add an image."
-        );
+        toast.error(t("addImage"));
         return;
       }
 
-      const storageId = nanoid();
+      setLoading(true);
 
       const formData = new FormData();
+      const storageId = nanoid();
       formData.append("file", article.image);
-      formData.append("path", `articles/${storageId}`);
+      formData.append("id", storageId);
 
-      const res = await fetch("/api/upload", {
+      const res = await fetch("/api/image", {
         method: "POST",
         body: formData,
       });
@@ -125,19 +95,20 @@ export default function AddArticle({ params }) {
       const data = await res.json();
       const imageURL = data.url;
 
-      const articlesRef = collection(db, "articles");
-      await addDoc(articlesRef, {
-        ...article,
-        storageId,
-        image: imageURL,
-        timestamp: serverTimestamp(),
+      const articleRes = await fetch("/api/addItem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...article,
+          image: imageURL,
+          storageId,
+          tableName: "articles",
+        }),
       });
 
-      toast.success(
-        lang === "ar"
-          ? "تم رفع المقالة بنجاح."
-          : "Article uploaded successfully."
-      );
+      if (!articleRes.ok) throw new Error("Failed to save article");
+
+      toast.success(t("success"));
 
       setArticle({
         image: null,
@@ -145,14 +116,16 @@ export default function AddArticle({ params }) {
         description: { en: "", ar: "" },
       });
     } catch (error) {
-      console.log("Failed to add article", error);
-      toast.error(
-        lang === "ar" ? "فشل في إضافة المقالة" : "Failed to add article"
-      );
+      console.error("Add article failed:", error);
+      toast.error(t("failed"));
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setActiveLang(locale);
+  }, [locale]);
 
   return (
     <div
@@ -163,11 +136,11 @@ export default function AddArticle({ params }) {
         border: "1px solid rgba(227, 227, 227, 1)",
       }}
     >
-      <h4 className="mb-4">{ui.addArticle}</h4>
+      <h4 className="mb-4">{t("addArticle")}</h4>
 
       <div className="mb-5" style={{ maxWidth: "200px" }}>
         <label htmlFor="langSelect" className="form-label">
-          {ui.langSelect}
+          {t("langSelect")}
         </label>
         <select
           id="langSelect"
@@ -182,7 +155,7 @@ export default function AddArticle({ params }) {
 
       <form onSubmit={handleSubmit} className="w-md-75">
         <div className="mb-4">
-          <label className="form-label mb-3">{ui.image}</label>
+          <label className="form-label mb-3">{"image"}</label>
           {article.image && (
             <img
               src={URL.createObjectURL(article.image)}
@@ -197,7 +170,7 @@ export default function AddArticle({ params }) {
               style={{ width: "107.27px" }}
               onClick={() => document.getElementById("ImgInput").click()}
             >
-              {article.image ? ui.change : ui.add}
+              {article.image ? t("change") : t("add")}
             </div>
           </div>
           <input
@@ -211,7 +184,7 @@ export default function AddArticle({ params }) {
         </div>
         <div className="mb-4">
           <label htmlFor="articleTitle" className="form-label">
-            {ui.title}
+            {t("title")}
           </label>
           <input
             id="articleTitle"
@@ -224,7 +197,7 @@ export default function AddArticle({ params }) {
           {error !== "" && <div className="form-text text-danger">{error}</div>}
         </div>
         <div className="mb-5">
-          <label className="form-label">{ui.description}</label>
+          <label className="form-label">{t("description")}</label>
           <JoditEditor
             ref={editor}
             config={config}
@@ -244,15 +217,15 @@ export default function AddArticle({ params }) {
             <>
               <span
                 className={`spinner-border spinner-border-sm ${
-                  lang === "en" ? "me-2" : "ms-2"
+                  locale === "en" ? "me-2" : "ms-2"
                 }`}
                 role="status"
                 aria-hidden="true"
               ></span>
-              {ui.adding}
+              {t("adding")}
             </>
           ) : (
-            ui.add
+            t("add")
           )}
         </button>
       </form>

@@ -2,6 +2,7 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { ToastContainer } from "react-toastify";
+import { AppProviders } from "@/contexts";
 
 export default function RootLayoutClient({ children }) {
   const locale = useLocale();
@@ -21,7 +22,7 @@ export default function RootLayoutClient({ children }) {
           className="d-flex flex-column flex-grow-1 bg-white"
           style={{ paddingTop: "91.38px" }}
         >
-          {children}
+          <AppProviders>{children}</AppProviders>
         </main>
       </body>
     </html>

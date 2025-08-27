@@ -1,15 +1,13 @@
 "use client";
-import React, { useContext, use } from "react";
-import { Context } from "@/providers/ContextProvider";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import useAuth from "@/hooks/UseAuth";
+import { useLocale, useTranslations } from "next-intl";
 
-export default function AdminsPage({ params }) {
-  const { lang } = use(params);
-  const { user } = useAuth();
+export default function AdminsPage() {
+  const locale = useLocale();
   const router = useRouter();
-  const { admins } = useContext(Context);
+  const admins = [];
+
   const PRIMARY_ADMIN_UID = "trGMbIRionW4fKEXIHl5lmjmWqv1";
 
   const primaryAdmin = admins.find((admin) => admin.id === PRIMARY_ADMIN_UID);
@@ -55,7 +53,7 @@ export default function AdminsPage({ params }) {
     },
   };
 
-  const t = content[lang] || content.en;
+  const t = content[locale] || content.en;
 
   const handleRemoveAdmin = async (uid, adminName) => {
     const confirmed = window.confirm(t.removeConfirm(adminName));
@@ -95,7 +93,7 @@ export default function AdminsPage({ params }) {
         <div
           className="primaryButton"
           style={{ borderRadius: "12px", cursor: "pointer" }}
-          onClick={() => router.push(`/${lang}/admin/add-admin`)}
+          onClick={() => router.push(`/admin/add-admin`)}
         >
           {t.add}
         </div>
@@ -140,7 +138,7 @@ export default function AdminsPage({ params }) {
                         : "—"}
                     </td>
                     <td>
-                      {user?.uid === PRIMARY_ADMIN_UID && (
+                      {/*{user?.uid === PRIMARY_ADMIN_UID && (
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() =>
@@ -149,7 +147,7 @@ export default function AdminsPage({ params }) {
                         >
                           {t.remove}
                         </button>
-                      )}
+                      )}*/}
                     </td>
                   </tr>
                 );

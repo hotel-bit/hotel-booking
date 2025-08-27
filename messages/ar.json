@@ -10,5 +10,43 @@
     "password": "كلمة المرور",
     "email": "البريد الإلكتروني",
     "signOut": "تسجيل الخروج"
+  },
+  "contacts": {
+    "title": "جهات الاتصال",
+    "searchPlaceholder": "ابحث بالاسم",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "message": "الرسالة",
+    "timestamp": "التاريخ والوقت",
+    "action": "الإجراء",
+    "noMessages": "لا توجد رسائل",
+    "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذه الرسالة؟",
+    "deleteSuccess": "تم حذف الرسالة بنجاح.",
+    "noMessagesFound": "لم يتم العثور على رسائل."
+  },
+  "articles": {
+    "articles": "المقالات",
+    "add": "إضافة",
+    "noArticles": "لا توجد مقالات بعد",
+    "view": "عرض",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "confirmDelete": "هل أنت متأكد أنك تريد حذف هذه المقالة؟",
+    "deletedSuccess": "تم حذف المقالة بنجاح.",
+    "deletedFail": "فشل حذف المقالة"
+  },
+  "addArticle": {
+    "addArticle": "إضافة مقالة",
+    "langSelect": "اختر لغة المحتوى",
+    "image": "صورة المقالة",
+    "title": "العنوان",
+    "description": "وَصْف",
+    "add": "إضافة",
+    "adding": "جارٍ الإضافة...",
+    "change": "تغيير",
+    "noUnderscores": "الشرطة السفلية غير مسموح بها في العنوان.",
+    "addImage": "الرجاء إضافة صورة.",
+    "success": "تم رفع المقالة بنجاح.",
+    "failed": "فشل في إضافة المقالة"
   }
 }

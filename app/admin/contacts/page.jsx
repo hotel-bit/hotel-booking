@@ -1,21 +1,26 @@
 "use client";
-import React, { useState, useContext, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
+import { useMessages } from "@/contexts/MessagesContext";
 import Pagination from "@mui/material/Pagination";
 import usePagination from "@/hooks/UsePagination";
-//import { Context } from "@/providers/ContextProvider";
 import { toast } from "react-toastify";
 import { IoSearch } from "react-icons/io5";
+import { useTranslations, useLocale } from "next-intl";
 
-export default function ContactsPage({ params }) {
-  const { lang } = use(params);
-  //  const { contacts } = useContext(Context);
-  const contacts = [];
+export default function ContactsPage() {
+  const locale = useLocale();
+  const t = useTranslations("contacts");
+  const { messages, setMessages, unreadMessages } = useMessages();
+  const [contacts, setContacts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMessages, setFilteredMessages] = useState([]);
   const [sortColumn, setSortColumn] = useState({
     path: "name",
     order: "asc",
   });
+
+  const messagesToDisplay =
+    filteredMessages.length > 0 ? filteredMessages : messages;
 
   const {
     totalPages,
@@ -24,85 +29,34 @@ export default function ContactsPage({ params }) {
     currentPageIndex,
     setcurrentPageIndex,
     displayPage,
-  } = usePagination(20, contacts.length);
+  } = usePagination(20, messagesToDisplay);
 
-  const messages = filteredMessages.length > 0 ? filteredMessages : contacts;
-  messages.sort((a, b) => {
+  messagesToDisplay.sort((a, b) => {
     const valueA = a[sortColumn.path];
     const valueB = b[sortColumn.path];
-    const comparison =
-      sortColumn.path === "timestamp"
-        ? valueA.toDate() - valueB.toDate()
-        : valueA.localeCompare(valueB);
+    let comparison = 0;
+
+    if (sortColumn.path === "timestamp") {
+      comparison = new Date(valueA) - new Date(valueB);
+    } else {
+      comparison = String(valueA).localeCompare(String(valueB));
+    }
+
     return sortColumn.order === "asc" ? comparison : -comparison;
   });
 
-  const currentMessages = messages.slice(startPageIndex, endPageIndex);
-
-  const messagesContent = {
-    en: {
-      deleteConfirm: "Are you sure you want to delete this message?",
-      deleteSuccess: "Message deleted successfully.",
-      noMessagesFound: "No messages found.",
-    },
-    ar: {
-      deleteConfirm: "هل أنت متأكد أنك تريد حذف هذه الرسالة؟",
-      deleteSuccess: "تم حذف الرسالة بنجاح.",
-      noMessagesFound: "لم يتم العثور على رسائل.",
-    },
-  };
-
-  const labels = {
-    en: {
-      title: "Contacts",
-      searchPlaceholder: "Search by name",
-      table: {
-        name: "Name",
-        email: "Email",
-        message: "Message",
-        timestamp: "Date & Time",
-        action: "Action",
-      },
-      noMessages: "No Messages",
-    },
-    ar: {
-      title: "جهات الاتصال",
-      searchPlaceholder: "ابحث بالاسم",
-      table: {
-        name: "الاسم",
-        email: "البريد الإلكتروني",
-        message: "الرسالة",
-        timestamp: "التاريخ والوقت",
-        action: "الإجراء",
-      },
-      noMessages: "لا توجد رسائل",
-    },
-  };
-
-  const t = labels[lang] || labels.en;
-  const c = messagesContent[lang] || messagesContent.en;
-
-  const deleteMessage = async (id) => {
-    const confirm = window.confirm(c.deleteConfirm);
-    if (confirm) {
-      if (currentMessages.length === 1 && contacts.length > 20) {
-        setcurrentPageIndex(currentPageIndex - 1);
-      }
-      await deleteDoc(doc(db, "contacts", id));
-      toast.success(c.deleteSuccess);
-    }
-  };
+  const currentMessages = messagesToDisplay.slice(startPageIndex, endPageIndex);
 
   const filterMessagesByName = (e) => {
     e.preventDefault();
-    const filtered = contacts.filter((message) =>
+    const filtered = messages.filter((message) =>
       message.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
     );
     if (filtered.length > 0) {
       setFilteredMessages(filtered);
       setcurrentPageIndex(1);
     } else {
-      toast(c.noMessagesFound);
+      toast(t("noMessagesFound"));
     }
   };
 
@@ -126,22 +80,53 @@ export default function ContactsPage({ params }) {
     return null;
   };
 
-  const unreadMessages = contacts.filter((contact) => contact.read === false);
+  const deleteMessage = async (id) => {
+    const confirmDelete = window.confirm(t("deleteConfirm"));
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch("/api/deleteItem", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tableName: "contactMessages", id }),
+      });
+
+      if (!res.ok) throw new Error("Failed to delete the message");
+
+      setMessages((prev) => prev.filter((msg) => msg.id !== id));
+      toast.success(t("deleteSuccess"));
+    } catch (error) {
+      console.error("Error deleting message:", error);
+      toast.error("Failed to delete message");
+    }
+  };
+
+  const markAsRead = async (id) => {
+    try {
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === id ? { ...msg, read: true } : msg))
+      );
+      await fetch("/api/updateItem", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tableName: "contactMessages",
+          id: id,
+          read: true,
+        }),
+      });
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+    }
+  };
 
   useEffect(() => {
-    const readMessages = async () => {
-      try {
-        const updatePromises = unreadMessages.map((message) => {
-          const messageRef = doc(db, "contacts", message.id);
-          return updateDoc(messageRef, { read: true });
-        });
-        await Promise.all(updatePromises);
-      } catch (error) {
-        console.error("Error updating messages read status:", error);
+    messages.forEach((msg) => {
+      if (!msg.read) {
+        markAsRead(msg.id);
       }
-    };
-    readMessages();
-  }, []);
+    });
+  }, [messages]);
 
   useEffect(() => {
     if (searchQuery.trim() === "") {
@@ -158,8 +143,8 @@ export default function ContactsPage({ params }) {
         border: "1px solid rgba(227, 227, 227, 1)",
       }}
     >
-      <h4 className="mb-5">{t.title}</h4>
-      {contacts.length > 0 ? (
+      <h4 className="mb-5">{t("title")}</h4>
+      {messages.length > 0 ? (
         <>
           <form
             onSubmit={filterMessagesByName}
@@ -167,12 +152,12 @@ export default function ContactsPage({ params }) {
           >
             <input
               type="search"
-              placeholder={t.searchPlaceholder}
+              placeholder={t("searchPlaceholder")}
               className="form-control"
               style={{
                 height: "50px",
-                paddingRight: lang === "en" ? "80px" : undefined,
-                paddingLeft: lang === "ar" ? "80px" : undefined,
+                paddingRight: locale === "en" ? "80px" : undefined,
+                paddingLeft: locale === "ar" ? "80px" : undefined,
               }}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -184,8 +169,8 @@ export default function ContactsPage({ params }) {
               style={{
                 borderRadius: "8px",
                 position: "absolute",
-                right: lang === "en" ? "8px" : "auto",
-                left: lang === "ar" ? "8px" : "auto",
+                right: locale === "en" ? "8px" : "auto",
+                left: locale === "ar" ? "8px" : "auto",
                 top: "50%",
                 transform: "translateY(-50%)",
               }}
@@ -199,13 +184,13 @@ export default function ContactsPage({ params }) {
               style={{ whiteSpace: "nowrap" }}
             >
               <thead>
-                <tr>
+                <tr style={{ userSelect: "none" }}>
                   <th
                     className="text-secondary cursor-pointer"
                     onClick={() => handleSort("name")}
                   >
                     <h6>
-                      {t.table.name} {getSortIcon("name")}
+                      {t("name")} {getSortIcon("name")}
                     </h6>
                   </th>
                   <th
@@ -213,7 +198,7 @@ export default function ContactsPage({ params }) {
                     onClick={() => handleSort("email")}
                   >
                     <h6>
-                      {t.table.email} {getSortIcon("email")}
+                      {t("email")} {getSortIcon("email")}
                     </h6>
                   </th>
                   <th
@@ -221,7 +206,7 @@ export default function ContactsPage({ params }) {
                     onClick={() => handleSort("message")}
                   >
                     <h6>
-                      {t.table.message} {getSortIcon("message")}
+                      {t("message")} {getSortIcon("message")}
                     </h6>
                   </th>
                   <th
@@ -229,11 +214,11 @@ export default function ContactsPage({ params }) {
                     onClick={() => handleSort("timestamp")}
                   >
                     <h6>
-                      {t.table.timestamp} {getSortIcon("timestamp")}
+                      {t("timestamp")} {getSortIcon("timestamp")}
                     </h6>
                   </th>
                   <th className="text-secondary">
-                    <h6>{t.table.action}</h6>
+                    <h6>{t("action")}</h6>
                   </th>
                 </tr>
               </thead>
@@ -256,7 +241,7 @@ export default function ContactsPage({ params }) {
                       {message.message}
                     </td>
                     <td>
-                      {message.timestamp.toDate().toLocaleString("en-US", {
+                      {new Date(message.timestamp).toLocaleString("en-US", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
@@ -277,7 +262,7 @@ export default function ContactsPage({ params }) {
               </tbody>
             </table>
           </div>
-          {contacts.length > 20 && (
+          {messagesToDisplay.length > 20 && (
             <div className="d-flex justify-content-center">
               <Pagination
                 count={totalPages}
@@ -289,7 +274,7 @@ export default function ContactsPage({ params }) {
           )}
         </>
       ) : (
-        <h6 className="text-center my-5">{t.noMessages}</h6>
+        <h6 className="text-center my-5">{t("noMessages")}</h6>
       )}
     </div>
   );

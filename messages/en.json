@@ -10,5 +10,44 @@
     "password": "Password",
     "email": "Email",
     "signOut": "Sign Out"
+  },
+  "contacts": {
+    "title": "Contacts",
+    "searchPlaceholder": "Search by name",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "timestamp": "Date & Time",
+    "action": "Action",
+    "noMessages": "No Messages",
+    "deleteConfirm": "Are you sure you want to delete this message?",
+    "deleteSuccess": "Message deleted successfully.",
+    "noMessagesFound": "No messages found.",
+    "addImage": "Please add an image."
+  },
+  "articles": {
+    "articles": "Articles",
+    "add": "Add",
+    "noArticles": "No articles yet",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this article?",
+    "deletedSuccess": "Article deleted successfully.",
+    "deletedFail": "Failed to delete article"
+  },
+  "addArticle": {
+    "addArticle": "Add Article",
+    "langSelect": "Select Content Language",
+    "image": "Article Image",
+    "title": "Title",
+    "description": "Description",
+    "add": "Add",
+    "adding": "Adding...",
+    "change": "Change",
+    "noUnderscores": "Underscores are not allowed in the title.",
+    "addImage": "Please add an image.",
+    "success": "Article uploaded successfully.",
+    "failed": "Failed to add article"
   }
 }

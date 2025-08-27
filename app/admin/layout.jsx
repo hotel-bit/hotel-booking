@@ -1,7 +1,7 @@
 "use client";
 import styles from "@/styles/admin.module.css";
-import React, { useState, useEffect, useContext } from "react";
-//import { Context } from "@/providers/ContextProvider";
+import React, { useState, useEffect } from "react";
+import { useMessages } from "@/contexts/MessagesContext";
 import { use } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,13 +23,10 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 export default function AdminAccount({ children }) {
   const locale = useLocale();
   const router = useRouter();
-  //  const { contacts } = useContext(Context);
-  const contacts = [];
+  const { unreadMessages } = useMessages();
   const pathName = usePathname();
   //  const { loading, user, isAdmin } = useAuth();
   const [showSettingDropdown, setShowSettingDropdown] = useState(false);
-
-  const unreadMessages = contacts.filter((contact) => contact.read === false);
 
   const handleLogout = async () => {
     try {
@@ -147,7 +144,7 @@ export default function AdminAccount({ children }) {
                   className={`${styles["account-nav-item"]} mb-1 mb-xl-2 ${
                     pathName === `/admin/articles` ? styles["active-route"] : ""
                   }`}
-                  href={`//admin/articles`}
+                  href={`/admin/articles`}
                 >
                   <ArticleOutlinedIcon />
                   <h5 className={`m-0 ${locale === "en" ? "ms-3" : "me-3"}`}>
@@ -170,12 +167,12 @@ export default function AdminAccount({ children }) {
                   <h5 className={`m-0 ${locale === "en" ? "ms-3" : "me-3"}`}>
                     {t("contacts")}
                   </h5>
-                  {unreadMessages.length > 0 && (
+                  {unreadMessages > 0 && (
                     <div
                       className="badge rounded-pill bg-danger"
                       style={{ position: "absolute", top: 17, right: 53 }}
                     >
-                      {unreadMessages.length}
+                      {unreadMessages}
                     </div>
                   )}
                 </Link>

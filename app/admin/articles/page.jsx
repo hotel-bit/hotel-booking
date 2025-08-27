@@ -1,19 +1,19 @@
 "use client";
-import React, { useContext, useEffect, use } from "react";
-import { Context } from "@/providers/ContextProvider";
-import { deleteDoc, doc } from "firebase/firestore";
-import { db } from "@/configuration/firebase-config";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Pagination from "@mui/material/Pagination";
 import usePagination from "@/hooks/UsePagination";
 import Link from "next/link";
 import { FaEye, FaTrash, FaPencilAlt } from "react-icons/fa";
+import { useTranslations, useLocale } from "next-intl";
 
-export default function Articles({ params }) {
-  const { lang } = use(params);
-  const { articles } = useContext(Context);
+export default function Articles() {
+  const locale = useLocale();
+  const t = useTranslations("articles");
   const router = useRouter();
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const {
     totalPages,
@@ -26,51 +26,61 @@ export default function Articles({ params }) {
 
   const currentArticles = articles.slice(startPageIndex, endPageIndex);
 
-  const translations = {
-    en: {
-      articles: "Articles",
-      add: "Add",
-      noArticles: "No articles yet",
-      view: "View",
-      edit: "Edit",
-      delete: "Delete",
-      confirmDelete: "Are you sure you want to delete this article?",
-      deletedSuccess: "Article deleted successfully.",
-      deletedFail: "Failed to delete article",
-    },
-    ar: {
-      articles: "المقالات",
-      add: "إضافة",
-      noArticles: "لا توجد مقالات بعد",
-      view: "عرض",
-      edit: "تعديل",
-      delete: "حذف",
-      confirmDelete: "هل أنت متأكد أنك تريد حذف هذه المقالة؟",
-      deletedSuccess: "تم حذف المقالة بنجاح.",
-      deletedFail: "فشل حذف المقالة",
-    },
-  };
-
-  const t = translations[lang] || translations.en;
-
   const handleDelete = async (article) => {
-    if (!window.confirm(t.confirmDelete)) return;
+    if (!window.confirm(t("confirmDelete"))) return;
 
     try {
-      await fetch("/api/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: `articles/${article.storageId}` }),
+      const resImg = await fetch(`/api/image`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bucket: "zahid-blog-images",
+          id: article.storageId,
+        }),
       });
 
-      await deleteDoc(doc(db, "articles", article.id));
+      if (!resImg.ok) throw new Error("Failed to delete image");
 
-      toast.success(t.deletedSuccess);
+      const res = await fetch("/api/deleteItem", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tableName: "articles", id: article.id }),
+      });
+
+      if (!res.ok) throw new Error("Failed to delete article");
+
+      setArticles((prev) => prev.filter((a) => a.id !== article.id));
+      toast.success(t("deletedSuccess"));
     } catch (error) {
       console.error("Failed to delete article:", error);
-      toast.error(t.deletedFail);
+      toast.error(t("deletedFail"));
     }
   };
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/fetchTable", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tableName: "articles" }),
+        });
+        if (!res.ok) throw new Error("Failed to fetch articles");
+        const data = await res.json();
+        setArticles(data);
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+        toast.error(t("fetchError"));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, []);
 
   return (
     <div
@@ -82,17 +92,17 @@ export default function Articles({ params }) {
       }}
     >
       <div className="d-flex justify-content-between align-items-start mb-5">
-        <h4>{t.articles}</h4>
+        <h4>{t("articles")}</h4>
         <div
           className="primaryButton"
           style={{ borderRadius: "12px" }}
-          onClick={() => router.push(`/${lang}/admin/add-article`)}
+          onClick={() => router.push(`/admin/add-article`)}
         >
-          {t.add}
+          {t("add")}
         </div>
       </div>
       {articles.length === 0 ? (
-        <h5 className="text-center my-5">{t.noArticles}</h5>
+        <h5 className="text-center my-5">{t("noArticles")}</h5>
       ) : (
         <>
           <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-3 row-cols-xxl-4 g-4 mb-5">
@@ -103,42 +113,40 @@ export default function Articles({ params }) {
                     <img
                       src={article.image}
                       className="card-img-top"
-                      alt={article.title[lang]}
+                      alt={article.title[locale]}
                     />
                     <div className="card-body d-flex flex-column">
                       <div
                         className="mb-3 clamp-3 fw-semibold flex-grow-1"
                         style={{ fontWeight: "600" }}
                       >
-                        {article.title[lang]}
+                        {article.title[locale]}
                       </div>
                       <div className="d-flex">
                         <div
                           className={`btn btn-primary ${
-                            lang === "en" ? "me-2" : "ms-2"
+                            locale === "en" ? "me-2" : "ms-2"
                           }`}
                           onClick={() =>
                             router.push(
-                              `/${lang}/article/${article.title["en"].replace(
+                              `/article/${article.title["en"].replace(
                                 /\s+/g,
                                 "_"
                               )}`
                             )
                           }
-                          title={t.view}
+                          title={t("view")}
                         >
                           <FaEye />
                         </div>
                         <div
                           className={`btn btn-warning text-white ${
-                            lang === "en" ? "me-2" : "ms-2"
+                            locale === "en" ? "me-2" : "ms-2"
                           }`}
                           onClick={() =>
-                            router.push(
-                              `/${lang}/admin/edit-article/${article.id}`
-                            )
+                            router.push(`/admin/edit-article/${article.id}`)
                           }
-                          title={t.edit}
+                          title={t("edit")}
                         >
                           <FaPencilAlt />
                         </div>
@@ -146,7 +154,7 @@ export default function Articles({ params }) {
                           className="btn btn-danger"
                           style={{ backgroundColor: "red" }}
                           onClick={() => handleDelete(article)}
-                          title={t.delete}
+                          title={t("delete")}
                         >
                           <FaTrash />
                         </div>
