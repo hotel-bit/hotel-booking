@@ -1,31 +1,25 @@
 "use client";
-import React, {
-  useState,
-  useRef,
-  useMemo,
-  useContext,
-  useEffect,
-  use,
-} from "react";
-import { Context } from "@/providers/ContextProvider";
+import React, { useState, useRef, useMemo, useEffect, use } from "react";
+import { useArticles } from "@/contexts/ArticlesContext";
 import dynamic from "next/dynamic";
 const JoditEditor = dynamic(() => import("jodit-react"), {
   ssr: false,
   loading: () => <p>Loading editor...</p>,
 });
-import { db } from "@/configuration/firebase-config";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
+import { useTranslations, useLocale } from "next-intl";
 
 import Loading from "@/components/Loading";
 
 export default function EditArticle({ params }) {
-  const { lang, id } = use(params);
+  const { id } = use(params);
+  const locale = useLocale();
+  const t = useTranslations("editArticle");
+  const { articles, setArticles } = useArticles();
   const router = useRouter();
-  const { articles } = useContext(Context);
-  const [activeLang, setActiveLang] = useState(lang || "en");
+  const [activeLang, setActiveLang] = useState(locale || "en");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [article, setArticle] = useState(null);
@@ -41,33 +35,6 @@ export default function EditArticle({ params }) {
     }),
     [activeLang]
   );
-
-  const labels = {
-    en: {
-      editArticle: "Edit Article",
-      langSelect: "Select Content Language",
-      image: "Article Image",
-      title: "Title",
-      description: "Description",
-      update: "Update",
-      updating: "Updating",
-      success: "Article updated successfully.",
-      error: "An error occurred while updating the article.",
-    },
-    ar: {
-      editArticle: "تعديل المقالة",
-      langSelect: "اختر لغة المحتوى",
-      image: "صورة المقالة",
-      title: "العنوان",
-      description: "وَصْف",
-      update: "تحديث",
-      updating: "تحديث",
-      success: "تم تحديث المقالة بنجاح.",
-      error: "حدث خطأ أثناء تحديث المقالة.",
-    },
-  };
-
-  const ui = labels[lang] || labels["en"];
 
   const handleChange = (field, value) => {
     if (field === "title") {
@@ -114,50 +81,43 @@ export default function EditArticle({ params }) {
     try {
       setLoading(true);
 
-      let storageId = article.storageId;
       let imageUrl = article.image;
 
       if (newImage) {
-        await fetch("/api/delete", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ path: `articles/${storageId}` }),
-        });
-
-        storageId = nanoid();
         const formData = new FormData();
         formData.append("file", newImage);
-        formData.append("path", `articles/${storageId}`);
+        formData.append("id", article.id);
+        formData.append("bucket", "zahid-blog-images");
 
-        const res = await fetch("/api/upload", {
+        const res = await fetch("/api/image", {
           method: "POST",
           body: formData,
         });
-
-        if (!res.ok) {
-          const errData = await res.json();
-          console.error("Upload API error:", errData);
-          throw new Error(errData.error || "Image upload failed");
-        }
-
+        if (!res.ok) throw new Error("Image upload failed");
         const data = await res.json();
         imageUrl = data.url;
       }
 
-      const articleRef = doc(db, "articles", id);
-      await updateDoc(articleRef, {
+      const articleData = {
         ...article,
         image: imageUrl,
-        timestamp: serverTimestamp(),
-        storageId,
+        tableName: "articles",
+      };
+
+      const articleRes = await fetch("/api/updateItem", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(articleData),
       });
 
-      toast.success(ui.success);
+      if (!articleRes.ok) throw new Error("Failed to update article");
+
+      toast.success(t("success"));
       setNewImage(null);
       router.back();
     } catch (error) {
-      console.log(ui.error, error);
-      toast.error(ui.error);
+      console.log(t("error"), error);
+      toast.error(t("error"));
     } finally {
       setLoading(false);
     }
@@ -173,6 +133,10 @@ export default function EditArticle({ params }) {
       }
     }
   }, [id, articles]);
+
+  useEffect(() => {
+    setActiveLang(locale);
+  }, [locale]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -191,11 +155,11 @@ export default function EditArticle({ params }) {
         border: "1px solid rgba(227, 227, 227, 1)",
       }}
     >
-      <h4 className="mb-4">{ui.editArticle}</h4>
+      <h4 className="mb-4">{t("editArticle")}</h4>
 
       <div className="mb-5" style={{ maxWidth: "200px" }}>
         <label htmlFor="langSelect" className="form-label">
-          {ui.langSelect}
+          {t("langSelect")}
         </label>
         <select
           id="langSelect"
@@ -210,7 +174,7 @@ export default function EditArticle({ params }) {
 
       <form onSubmit={handleSubmit} className="w-md-75">
         <div className="mb-4">
-          <label className="form-label mb-3">{ui.image}</label>
+          <label className="form-label mb-3">{t("image")}</label>
           {(article.image || newImage) && (
             <img
               src={article.image || URL.createObjectURL(newImage)}
@@ -240,7 +204,7 @@ export default function EditArticle({ params }) {
 
         <div className="mb-4">
           <label htmlFor="articleTitle" className="form-label">
-            {ui.title}
+            {t("title")}
           </label>
           <input
             id="articleTitle"
@@ -249,11 +213,12 @@ export default function EditArticle({ params }) {
             value={article.title?.[activeLang] || ""}
             onChange={(e) => handleChange("title", e.target.value)}
             required
+            dir={activeLang === "ar" ? "rtl" : "ltr"}
           />
           {error && <div className="form-text text-danger">{error}</div>}
         </div>
         <div className="mb-5">
-          <label className="form-label">{ui.description}</label>
+          <label className="form-label">{t("description")}</label>
           <JoditEditor
             ref={editor}
             config={config}
@@ -274,15 +239,15 @@ export default function EditArticle({ params }) {
             <>
               <span
                 className={`spinner-border spinner-border-sm ${
-                  lang === "en" ? "me-2" : "ms-2"
+                  locale === "en" ? "me-2" : "ms-2"
                 }`}
                 role="status"
                 aria-hidden="true"
               ></span>
-              {ui.updating}
+              {t("updating")}
             </>
           ) : (
-            ui.update
+            t("update")
           )}
         </button>
       </form>

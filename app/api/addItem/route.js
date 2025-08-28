@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { dynamoDb } from "@/lib/aws";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
-import { nanoid } from "nanoid";
 
 export async function POST(req) {
   try {
@@ -10,21 +9,14 @@ export async function POST(req) {
 
     if (!tableName) throw new Error("Table name is required");
 
-    const id = nanoid();
-    const item = {
-      id,
-      ...data,
-      timestamp: new Date().toISOString(),
-    };
-
     await dynamoDb.send(
       new PutCommand({
         TableName: tableName,
-        Item: item,
+        Item: data,
       })
     );
 
-    return NextResponse.json({ success: true, id });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error adding item:", error);
     return NextResponse.json({ error: "Failed to add item" }, { status: 500 });

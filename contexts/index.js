@@ -1,7 +1,12 @@
 "use client";
 
 import { MessagesProvider } from "./MessagesContext";
+import { ArticlesProvider } from "./ArticlesContext";
 
 export const AppProviders = ({ children }) => {
-  return <MessagesProvider>{children}</MessagesProvider>;
+  return (
+    <MessagesProvider>
+      <ArticlesProvider>{children}</ArticlesProvider>
+    </MessagesProvider>
+  );
 };

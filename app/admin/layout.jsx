@@ -11,10 +11,9 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import ArrowDropDownSharpIcon from "@mui/icons-material/ArrowDropDownSharp";
 import ArrowDropUpSharpIcon from "@mui/icons-material/ArrowDropUpSharp";
 import MenuOpenRoundedIcon from "@mui/icons-material/MenuOpenRounded";
-import LocalMallOutlinedIcon from "@mui/icons-material/LocalMallOutlined";
+import NightShelterOutlinedIcon from "@mui/icons-material/NightShelterOutlined";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
-import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 
 import Loading from "@/components/Loading";
@@ -114,28 +113,13 @@ export default function AdminAccount({ children }) {
               <div data-bs-dismiss="offcanvas" data-bs-target="#offcanvasMenu">
                 <Link
                   className={`${styles["account-nav-item"]} mb-1 mb-xl-2 ${
-                    pathName === `/admin/products` ? styles["active-route"] : ""
+                    pathName === `/admin/hotels` ? styles["active-route"] : ""
                   }`}
-                  href={`/admin/products`}
+                  href={`/admin/hotels`}
                 >
-                  <LocalMallOutlinedIcon />
+                  <NightShelterOutlinedIcon />
                   <h5 className={`m-0 ${locale === "en" ? "ms-3" : "me-3"}`}>
-                    {t("products")}
-                  </h5>
-                </Link>
-              </div>
-              <div data-bs-dismiss="offcanvas" data-bs-target="#offcanvasMenu">
-                <Link
-                  className={`${styles["account-nav-item"]} mb-1 mb-xl-2 ${
-                    pathName === `/admin/categories`
-                      ? styles["active-route"]
-                      : ""
-                  }`}
-                  href={`/admin/categories`}
-                >
-                  <CategoryOutlinedIcon />
-                  <h5 className={`m-0 ${locale === "en" ? "ms-3" : "me-3"}`}>
-                    {t("categories")}
+                    {t("hotels")}
                   </h5>
                 </Link>
               </div>

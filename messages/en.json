@@ -1,7 +1,6 @@
 {
   "layout": {
-    "products": "Products",
-    "categories": "Categories",
+    "hotels": "Hotels",
     "articles": "Articles",
     "contacts": "Contacts",
     "admins": "Admins",
@@ -49,5 +48,16 @@
     "addImage": "Please add an image.",
     "success": "Article uploaded successfully.",
     "failed": "Failed to add article"
+  },
+  "editArticle": {
+    "editArticle": "Edit Article",
+    "langSelect": "Select Content Language",
+    "image": "Article Image",
+    "title": "Title",
+    "description": "Description",
+    "update": "Update",
+    "updating": "Updating",
+    "success": "Article updated successfully.",
+    "error": "An error occurred while updating the article."
   }
 }

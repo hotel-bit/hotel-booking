@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useArticles } from "@/contexts/ArticlesContext";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Pagination from "@mui/material/Pagination";
@@ -12,7 +13,7 @@ export default function Articles() {
   const locale = useLocale();
   const t = useTranslations("articles");
   const router = useRouter();
-  const [articles, setArticles] = useState([]);
+  const { articles, setArticles } = useArticles();
   const [loading, setLoading] = useState(true);
 
   const {
@@ -37,7 +38,7 @@ export default function Articles() {
         },
         body: JSON.stringify({
           bucket: "zahid-blog-images",
-          id: article.storageId,
+          id: article.id,
         }),
       });
 
@@ -53,6 +54,9 @@ export default function Articles() {
 
       setArticles((prev) => prev.filter((a) => a.id !== article.id));
       toast.success(t("deletedSuccess"));
+      if (articles.length > 20 && currentArticles.length === 1) {
+        setcurrentPageIndex(currentPageIndex - 1);
+      }
     } catch (error) {
       console.error("Failed to delete article:", error);
       toast.error(t("deletedFail"));
@@ -110,11 +114,29 @@ export default function Articles() {
               return (
                 <div className="col" key={article.id}>
                   <div className="card h-100 shadow-sm rounded-3 overflow-hidden">
-                    <img
-                      src={article.image}
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "100%",
+                        paddingTop: "83.83%",
+                        backgroundColor: "#f0f0f0",
+                        overflow: "hidden",
+                      }}
                       className="card-img-top"
-                      alt={article.title[locale]}
-                    />
+                    >
+                      <img
+                        src={article.image}
+                        alt={article.title[locale]}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                        }}
+                        loading="lazy"
+                      />
+                    </div>
                     <div className="card-body d-flex flex-column">
                       <div
                         className="mb-3 clamp-3 fw-semibold flex-grow-1"
@@ -127,14 +149,14 @@ export default function Articles() {
                           className={`btn btn-primary ${
                             locale === "en" ? "me-2" : "ms-2"
                           }`}
-                          onClick={() =>
-                            router.push(
-                              `/article/${article.title["en"].replace(
-                                /\s+/g,
-                                "_"
-                              )}`
-                            )
-                          }
+                          //  onClick={() =>
+                          //    router.push(
+                          //      `/article/${article.title["en"].replace(
+                          //        /\s+/g,
+                          //        "_"
+                          //      )}`
+                          //    )
+                          //  }
                           title={t("view")}
                         >
                           <FaEye />

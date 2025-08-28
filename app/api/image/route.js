@@ -7,21 +7,23 @@ export async function POST(req) {
     const formData = await req.formData();
     const file = formData.get("file");
     const id = formData.get("id");
+    const bucket = formData.get("bucket");
 
-    if (!file || !id) throw new Error("Missing file or storage id");
+    if (!file || !id || !bucket)
+      throw new Error("Missing file, storage id, or bucket");
 
     const arrayBuffer = await file.arrayBuffer();
 
     await s3.send(
       new PutObjectCommand({
-        Bucket: "zahid-blog-images",
+        Bucket: bucket,
         Key: id,
         Body: arrayBuffer,
         ContentType: file.type,
       })
     );
 
-    const url = `https://zahid-blog-images.s3.${process.env.AWS_REGION}.amazonaws.com/${id}`;
+    const url = `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${id}`;
 
     return NextResponse.json({ url });
   } catch (error) {

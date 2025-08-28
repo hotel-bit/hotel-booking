@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useMemo, useEffect } from "react";
+import { useArticles } from "@/contexts/ArticlesContext";
 import dynamic from "next/dynamic";
 const JoditEditor = dynamic(() => import("jodit-react"), {
   ssr: false,
@@ -8,10 +9,13 @@ const JoditEditor = dynamic(() => import("jodit-react"), {
 import { nanoid } from "nanoid";
 import { toast } from "react-toastify";
 import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 
 export default function AddArticle() {
   const locale = useLocale();
+  const router = useRouter();
   const t = useTranslations("addArticle");
+  const { articles, setArticles } = useArticles();
 
   const [activeLang, setActiveLang] = useState(locale || "en");
   const [article, setArticle] = useState({
@@ -84,6 +88,7 @@ export default function AddArticle() {
       const storageId = nanoid();
       formData.append("file", article.image);
       formData.append("id", storageId);
+      formData.append("bucket", "zahid-blog-images");
 
       const res = await fetch("/api/image", {
         method: "POST",
@@ -95,26 +100,34 @@ export default function AddArticle() {
       const data = await res.json();
       const imageURL = data.url;
 
+      const timestamp = new Date().toISOString();
+
+      const articleData = {
+        ...article,
+        image: imageURL,
+        id: storageId,
+        timestamp,
+        tableName: "articles",
+      };
+
       const articleRes = await fetch("/api/addItem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...article,
-          image: imageURL,
-          storageId,
-          tableName: "articles",
-        }),
+        body: JSON.stringify(articleData),
       });
 
       if (!articleRes.ok) throw new Error("Failed to save article");
 
       toast.success(t("success"));
 
+      setArticles((prev) => [articleData, ...prev]);
+
       setArticle({
         image: null,
         title: { en: "", ar: "" },
         description: { en: "", ar: "" },
       });
+      router.back();
     } catch (error) {
       console.error("Add article failed:", error);
       toast.error(t("failed"));
@@ -193,6 +206,7 @@ export default function AddArticle() {
             value={article.title[activeLang]}
             onChange={(e) => handleChange("title", e.target.value)}
             required
+            dir={activeLang === "ar" ? "rtl" : "ltr"}
           />
           {error !== "" && <div className="form-text text-danger">{error}</div>}
         </div>

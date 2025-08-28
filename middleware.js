@@ -3,8 +3,19 @@ import { NextResponse } from "next/server";
 const supportedLanguages = ["en", "ar"];
 
 export function middleware(req) {
-  const res = NextResponse.next();
+  const url = req.nextUrl.clone();
 
+  if (url.pathname === "/") {
+    url.pathname = "/admin/hotels";
+    return NextResponse.redirect(url);
+  }
+
+  if (url.pathname === "/admin") {
+    url.pathname = "/admin/hotels";
+    return NextResponse.redirect(url);
+  }
+
+  const res = NextResponse.next();
   const localeCookie = req.cookies.get("locale")?.value;
 
   if (!localeCookie) {
@@ -22,5 +33,5 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: "/:path*",
+  matcher: ["/:path*"],
 };
