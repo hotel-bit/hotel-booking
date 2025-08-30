@@ -17,6 +17,7 @@ export default function EditArticle({ params }) {
   const { id } = use(params);
   const locale = useLocale();
   const t = useTranslations("editArticle");
+    const c = useTranslations("common");
   const { articles, setArticles } = useArticles();
   const router = useRouter();
   const [activeLang, setActiveLang] = useState(locale || "en");
@@ -159,7 +160,7 @@ export default function EditArticle({ params }) {
 
       <div className="mb-5" style={{ maxWidth: "200px" }}>
         <label htmlFor="langSelect" className="form-label">
-          {t("langSelect")}
+          {c("langSelect")}
         </label>
         <select
           id="langSelect"

@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 export default function AddCity() {
   const { cities, setCities } = useCities();
   const t = useTranslations("addCity");
+    const c = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
   const [activeLang, setActiveLang] = useState(locale || "en");
@@ -160,7 +161,7 @@ export default function AddCity() {
       <h4 className="mb-5">{t("pageTitle")}</h4>
       <div className="mb-5" style={{ maxWidth: "200px" }}>
         <label htmlFor="langSelect" className="form-label">
-          {t("langSelect")}
+          {c("langSelect")}
         </label>
         <select
           id="langSelect"

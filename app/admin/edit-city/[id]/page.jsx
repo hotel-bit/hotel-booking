@@ -18,6 +18,7 @@ export default function EditCity({ params }) {
   const { id } = use(params);
   const locale = useLocale();
   const t = useTranslations("editCity");
+  const c = useTranslations("common");
   const { cities, setCities } = useCities();
   const router = useRouter();
   const [activeLang, setActiveLang] = useState(locale || "en");
@@ -176,7 +177,7 @@ export default function EditCity({ params }) {
 
       <div className="mb-5" style={{ maxWidth: "200px" }}>
         <label htmlFor="langSelect" className="form-label">
-          {t("langSelect")}
+          {c("langSelect")}
         </label>
         <select
           id="langSelect"

@@ -23,7 +23,6 @@
   },
   "addCity": {
     "pageTitle": "Add City",
-    "langSelect": "Select Content Language",
     "image": "City Image",
     "title": "Title",
     "add": "Add",
@@ -35,13 +34,19 @@
   },
   "editCity": {
     "pageTitle": "Edit City",
-    "langSelect": "Select Content Language",
     "image": "City Image",
     "title": "Title",
     "update": "Update",
     "updating": "Updating",
     "success": "City updated successfully.",
     "error": "An error occurred while updating the city."
+  },
+  "hotels": {
+    "title": "Hotels",
+    "add": "Add Hotel"
+  },
+  "addHotel": {
+    "pageTitle": "Add Hotel"
   },
   "contacts": {
     "title": "Contacts",
@@ -70,7 +75,6 @@
   },
   "addArticle": {
     "pageTitle": "Add Article",
-    "langSelect": "Select Content Language",
     "image": "Article Image",
     "title": "Title",
     "description": "Description",
@@ -84,7 +88,6 @@
   },
   "editArticle": {
     "pageTitle": "Edit Article",
-    "langSelect": "Select Content Language",
     "image": "Article Image",
     "title": "Title",
     "description": "Description",
@@ -92,5 +95,8 @@
     "updating": "Updating",
     "success": "Article updated successfully.",
     "error": "An error occurred while updating the article."
+  },
+  "common": {
+    "langSelect": "Select Content Language"
   }
 }

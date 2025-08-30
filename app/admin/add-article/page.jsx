@@ -15,6 +15,7 @@ export default function AddArticle() {
   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations("addArticle");
+    const c = useTranslations("common");
   const { articles, setArticles } = useArticles();
 
   const [activeLang, setActiveLang] = useState(locale || "en");
@@ -153,7 +154,7 @@ export default function AddArticle() {
 
       <div className="mb-5" style={{ maxWidth: "200px" }}>
         <label htmlFor="langSelect" className="form-label">
-          {t("langSelect")}
+          {c("langSelect")}
         </label>
         <select
           id="langSelect"
