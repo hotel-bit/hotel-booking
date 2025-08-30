@@ -8,11 +8,10 @@ export const useArticles = () => useContext(ArticlesContext);
 
 export const ArticlesProvider = ({ children }) => {
   const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchArticles = async () => {
-      setLoading(true);
       try {
         const res = await fetch("/api/fetchTable", {
           method: "POST",

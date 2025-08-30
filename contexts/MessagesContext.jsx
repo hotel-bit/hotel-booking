@@ -8,11 +8,10 @@ export const useMessages = () => useContext(MessagesContext);
 
 export const MessagesProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMessages = async () => {
-      setLoading(true);
       try {
         const res = await fetch("/api/fetchTable", {
           method: "POST",

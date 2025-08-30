@@ -10,7 +10,7 @@ import { useTranslations, useLocale } from "next-intl";
 export default function ContactsPage() {
   const locale = useLocale();
   const t = useTranslations("contacts");
-  const { messages, setMessages, unreadMessages } = useMessages();
+  const { messages, setMessages, unreadMessages, loading } = useMessages();
   const [contacts, setContacts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMessages, setFilteredMessages] = useState([]);
@@ -144,7 +144,13 @@ export default function ContactsPage() {
       }}
     >
       <h4 className="mb-5">{t("title")}</h4>
-      {messages.length > 0 ? (
+      {loading ? (
+        <div className="d-flex justify-content-center align-items-center my-5">
+          <div className="spinner-border primary-color" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      ) : messages.length > 0 ? (
         <>
           <form
             onSubmit={filterMessagesByName}
@@ -178,6 +184,7 @@ export default function ContactsPage() {
               <IoSearch style={{ width: "20px", height: "20px" }} />
             </button>
           </form>
+
           <div className="table-responsive mb-5">
             <table
               className="table table-hover table-borderless"
@@ -262,6 +269,7 @@ export default function ContactsPage() {
               </tbody>
             </table>
           </div>
+
           {messagesToDisplay.length > 20 && (
             <div className="d-flex justify-content-center">
               <Pagination

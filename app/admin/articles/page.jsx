@@ -13,8 +13,7 @@ export default function Articles() {
   const locale = useLocale();
   const t = useTranslations("articles");
   const router = useRouter();
-  const { articles, setArticles } = useArticles();
-  const [loading, setLoading] = useState(true);
+  const { articles, setArticles, loading } = useArticles();
 
   const {
     totalPages,
@@ -63,29 +62,6 @@ export default function Articles() {
     }
   };
 
-  useEffect(() => {
-    const fetchArticles = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch("/api/fetchTable", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tableName: "articles" }),
-        });
-        if (!res.ok) throw new Error("Failed to fetch articles");
-        const data = await res.json();
-        setArticles(data);
-      } catch (error) {
-        console.error("Error fetching articles:", error);
-        toast.error(t("fetchError"));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, []);
-
   return (
     <div
       style={{
@@ -96,7 +72,7 @@ export default function Articles() {
       }}
     >
       <div className="d-flex justify-content-between align-items-start mb-5">
-        <h4>{t("articles")}</h4>
+        <h4>{t("title")}</h4>
         <div
           className="primaryButton"
           style={{ borderRadius: "12px" }}
@@ -105,7 +81,14 @@ export default function Articles() {
           {t("add")}
         </div>
       </div>
-      {articles.length === 0 ? (
+
+      {loading ? (
+        <div className="d-flex justify-content-center align-items-center my-5">
+          <div className="spinner-border primary-color" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      ) : articles.length === 0 ? (
         <h5 className="text-center my-5">{t("noArticles")}</h5>
       ) : (
         <>
@@ -149,14 +132,6 @@ export default function Articles() {
                           className={`btn btn-primary ${
                             locale === "en" ? "me-2" : "ms-2"
                           }`}
-                          //  onClick={() =>
-                          //    router.push(
-                          //      `/article/${article.title["en"].replace(
-                          //        /\s+/g,
-                          //        "_"
-                          //      )}`
-                          //    )
-                          //  }
                           title={t("view")}
                         >
                           <FaEye />

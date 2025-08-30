@@ -1,6 +1,7 @@
 {
   "layout": {
     "hotels": "Hotels",
+    "cities": "Cities",
     "articles": "Articles",
     "contacts": "Contacts",
     "admins": "Admins",
@@ -9,6 +10,38 @@
     "password": "Password",
     "email": "Email",
     "signOut": "Sign Out"
+  },
+  "cities": {
+    "title": "Cities",
+    "add": "Add City",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noCities": "No cities found.",
+    "confirmDelete": "Are you sure you want to delete this city?",
+    "deletedSuccess": "city deleted successfully.",
+    "deletedFail": "Failed to delete city"
+  },
+  "addCity": {
+    "pageTitle": "Add City",
+    "langSelect": "Select Content Language",
+    "image": "City Image",
+    "title": "Title",
+    "add": "Add",
+    "adding": "Adding...",
+    "change": "Change",
+    "addImage": "Please add an image.",
+    "success": "City added successfully.",
+    "failed": "Failed to add city"
+  },
+  "editCity": {
+    "pageTitle": "Edit City",
+    "langSelect": "Select Content Language",
+    "image": "City Image",
+    "title": "Title",
+    "update": "Update",
+    "updating": "Updating",
+    "success": "City updated successfully.",
+    "error": "An error occurred while updating the city."
   },
   "contacts": {
     "title": "Contacts",
@@ -25,7 +58,7 @@
     "addImage": "Please add an image."
   },
   "articles": {
-    "articles": "Articles",
+    "title": "Articles",
     "add": "Add",
     "noArticles": "No articles yet",
     "view": "View",
@@ -36,7 +69,7 @@
     "deletedFail": "Failed to delete article"
   },
   "addArticle": {
-    "addArticle": "Add Article",
+    "pageTitle": "Add Article",
     "langSelect": "Select Content Language",
     "image": "Article Image",
     "title": "Title",
@@ -50,7 +83,7 @@
     "failed": "Failed to add article"
   },
   "editArticle": {
-    "editArticle": "Edit Article",
+    "pageTitle": "Edit Article",
     "langSelect": "Select Content Language",
     "image": "Article Image",
     "title": "Title",

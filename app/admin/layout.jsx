@@ -15,6 +15,7 @@ import NightShelterOutlinedIcon from "@mui/icons-material/NightShelterOutlined";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import LocationCityIcon from "@mui/icons-material/LocationCity";
 
 import Loading from "@/components/Loading";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -40,6 +41,39 @@ export default function AdminAccount({ children }) {
   };
 
   const t = useTranslations("layout");
+
+  const badgeCounts = {
+    unreadMessages,
+  };
+
+  const navItems = [
+    {
+      key: "hotels",
+      url: "/admin/hotels",
+      icon: <NightShelterOutlinedIcon />,
+    },
+    {
+      key: "cities",
+      url: "/admin/cities",
+      icon: <LocationCityIcon />,
+    },
+    {
+      key: "articles",
+      url: "/admin/articles",
+      icon: <ArticleOutlinedIcon />,
+    },
+    {
+      key: "contacts",
+      url: "/admin/contacts",
+      icon: <ContactsOutlinedIcon />,
+      badgeKey: "unreadMessages",
+    },
+    {
+      key: "admins",
+      url: "/admin/admins",
+      icon: <SupervisorAccountIcon />,
+    },
+  ];
 
   //  useEffect(() => {
   //    if (!loading && (!user || !isAdmin)) {
@@ -110,70 +144,47 @@ export default function AdminAccount({ children }) {
                 overflowY: "auto",
               }}
             >
-              <div data-bs-dismiss="offcanvas" data-bs-target="#offcanvasMenu">
-                <Link
-                  className={`${styles["account-nav-item"]} mb-1 mb-xl-2 ${
-                    pathName === `/admin/hotels` ? styles["active-route"] : ""
-                  }`}
-                  href={`/admin/hotels`}
-                >
-                  <NightShelterOutlinedIcon />
-                  <h5 className={`m-0 ${locale === "en" ? "ms-3" : "me-3"}`}>
-                    {t("hotels")}
-                  </h5>
-                </Link>
-              </div>
-              <div data-bs-dismiss="offcanvas" data-bs-target="#offcanvasMenu">
-                <Link
-                  className={`${styles["account-nav-item"]} mb-1 mb-xl-2 ${
-                    pathName === `/admin/articles` ? styles["active-route"] : ""
-                  }`}
-                  href={`/admin/articles`}
-                >
-                  <ArticleOutlinedIcon />
-                  <h5 className={`m-0 ${locale === "en" ? "ms-3" : "me-3"}`}>
-                    {t("articles")}
-                  </h5>
-                </Link>
-              </div>
-              <div
-                data-bs-dismiss="offcanvas"
-                data-bs-target="#offcanvasMenu"
-                style={{ position: "relative" }}
-              >
-                <Link
-                  className={`${styles["account-nav-item"]} mb-1 mb-xl-2 ${
-                    pathName === `/admin/contacts` ? styles["active-route"] : ""
-                  }`}
-                  href={`/admin/contacts`}
-                >
-                  <ContactsOutlinedIcon />
-                  <h5 className={`m-0 ${locale === "en" ? "ms-3" : "me-3"}`}>
-                    {t("contacts")}
-                  </h5>
-                  {unreadMessages > 0 && (
-                    <div
-                      className="badge rounded-pill bg-danger"
-                      style={{ position: "absolute", top: 17, right: 53 }}
+              {navItems.map(({ key, url, icon, badgeKey }) => {
+                const badgeCount = badgeKey ? badgeCounts[badgeKey] : 0;
+
+                return (
+                  <div
+                    key={key}
+                    data-bs-dismiss="offcanvas"
+                    data-bs-target="#offcanvasMenu"
+                    style={{ position: "relative" }}
+                  >
+                    <Link
+                      className={`${styles["account-nav-item"]} mb-1 mb-xl-2 ${
+                        pathName === url ? styles["active-route"] : ""
+                      }`}
+                      href={url}
                     >
-                      {unreadMessages}
-                    </div>
-                  )}
-                </Link>
-              </div>
-              <div data-bs-dismiss="offcanvas" data-bs-target="#offcanvasMenu">
-                <Link
-                  className={`${styles["account-nav-item"]} mb-1 mb-xl-2 ${
-                    pathName === `/admin/admins` ? styles["active-route"] : ""
-                  }`}
-                  href={`/admin/admins`}
-                >
-                  <SupervisorAccountIcon />
-                  <h5 className={`m-0 ${locale === "en" ? "ms-3" : "me-3"}`}>
-                    {t("admins")}
-                  </h5>
-                </Link>
-              </div>
+                      {icon}
+                      <h5
+                        className={`m-0 ${locale === "en" ? "ms-3" : "me-3"}`}
+                      >
+                        {t(key)}
+                      </h5>
+
+                      {badgeCount > 0 && (
+                        <div
+                          className="badge rounded-pill bg-danger"
+                          style={{
+                            position: "absolute",
+                            top: 17,
+                            right: locale === "en" ? 0 : "",
+                            left: locale === "ar" ? 0 : "",
+                          }}
+                        >
+                          {badgeCount}
+                        </div>
+                      )}
+                    </Link>
+                  </div>
+                );
+              })}
+
               <div
                 className={`${styles["account-nav-item"]} mb-1 mb-xl-2 cursor-pointer`}
                 onClick={toggleSettingDropdown}

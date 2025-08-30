@@ -155,7 +155,7 @@ export default function EditArticle({ params }) {
         border: "1px solid rgba(227, 227, 227, 1)",
       }}
     >
-      <h4 className="mb-4">{t("editArticle")}</h4>
+      <h4 className="mb-4">{t("pageTitle")}</h4>
 
       <div className="mb-5" style={{ maxWidth: "200px" }}>
         <label htmlFor="langSelect" className="form-label">
@@ -186,7 +186,6 @@ export default function EditArticle({ params }) {
           <div className="d-flex mb-3">
             <div
               className="primaryButton text-center me-2"
-              style={{ width: "107.27px" }}
               onClick={() => document.getElementById("ImgInput").click()}
             >
               {article.image || newImage ? "Change" : "Add"}
