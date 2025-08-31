@@ -14,8 +14,6 @@
   "cities": {
     "title": "Cities",
     "add": "Add City",
-    "edit": "Edit",
-    "delete": "Delete",
     "noCities": "No cities found.",
     "confirmDelete": "Are you sure you want to delete this city?",
     "deletedSuccess": "city deleted successfully.",
@@ -25,9 +23,6 @@
     "pageTitle": "Add City",
     "image": "City Image",
     "title": "Title",
-    "add": "Add",
-    "adding": "Adding...",
-    "change": "Change",
     "addImage": "Please add an image.",
     "success": "City added successfully.",
     "failed": "Failed to add city"
@@ -36,18 +31,37 @@
     "pageTitle": "Edit City",
     "image": "City Image",
     "title": "Title",
-    "update": "Update",
-    "updating": "Updating",
     "success": "City updated successfully.",
     "error": "An error occurred while updating the city."
   },
   "hotels": {
     "title": "Hotels",
-    "add": "Add Hotel"
+    "add": "Add Hotel",
+    "confirmDelete": "Are you sure you want to delete this hotel?",
+    "deletedSuccess": "Hotel deleted successfully.",
+    "deletedFail": "Failed to delete hotel",
+    "rooms": "Rooms"
   },
   "addHotel": {
-    "pageTitle": "Add Hotel"
+    "pageTitle": "Add Hotel",
+    "addImages": "Add atleast one image",
+    "images": "Images",
+    "title": "Hotel Name",
+    "address": "Adress",
+    "brief": "About Hotel",
+    "services": "Services",
+    "terms": "Terms",
+    "success": "Hotel uploaded successfully."
   },
+  "editHotel": {},
+  "rooms": {
+    "title": "Rooms",
+    "add": "Add Room"
+  },
+  "addRoom": {
+    "pageTitle": "Add Room"
+  },
+  "editRoom": {},
   "contacts": {
     "title": "Contacts",
     "searchPlaceholder": "Search by name",
@@ -64,11 +78,7 @@
   },
   "articles": {
     "title": "Articles",
-    "add": "Add",
     "noArticles": "No articles yet",
-    "view": "View",
-    "edit": "Edit",
-    "delete": "Delete",
     "confirmDelete": "Are you sure you want to delete this article?",
     "deletedSuccess": "Article deleted successfully.",
     "deletedFail": "Failed to delete article"
@@ -78,10 +88,6 @@
     "image": "Article Image",
     "title": "Title",
     "description": "Description",
-    "add": "Add",
-    "adding": "Adding...",
-    "change": "Change",
-    "noUnderscores": "Underscores are not allowed in the title.",
     "addImage": "Please add an image.",
     "success": "Article uploaded successfully.",
     "failed": "Failed to add article"
@@ -91,12 +97,19 @@
     "image": "Article Image",
     "title": "Title",
     "description": "Description",
-    "update": "Update",
-    "updating": "Updating",
     "success": "Article updated successfully.",
     "error": "An error occurred while updating the article."
   },
   "common": {
-    "langSelect": "Select Content Language"
+    "langSelect": "Select Content Language",
+    "add": "Add",
+    "adding": "Adding",
+    "change": "Change",
+    "update": "Update",
+    "updating": "Updating",
+    "noUnderscores": "Underscores are not allowed in the title.",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }

@@ -188,7 +188,7 @@ export default function AddCity() {
             className="primaryButton text-center me-2"
             onClick={() => document.getElementById("ImgInput").click()}
           >
-            {newCity.image ? t("change") : t("add")}
+            {newCity.image ? c("change") : c("add")}
           </div>
         </div>
         <input
@@ -229,10 +229,10 @@ export default function AddCity() {
                 role="status"
                 aria-hidden="true"
               ></span>
-              {t("adding")}
+              {c("adding")}
             </>
           ) : (
-            t("add")
+            c("add")
           )}
         </button>
       </form>

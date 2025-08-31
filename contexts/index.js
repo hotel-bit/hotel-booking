@@ -3,12 +3,15 @@
 import { MessagesProvider } from "./MessagesContext";
 import { ArticlesProvider } from "./ArticlesContext";
 import { CitiesProvider } from "./CitiesContext";
+import { HotelsProvider } from "./HotelsContext";
 
 export const AppProviders = ({ children }) => {
   return (
     <MessagesProvider>
       <ArticlesProvider>
-        <CitiesProvider>{children}</CitiesProvider>
+        <CitiesProvider>
+          <HotelsProvider>{children}</HotelsProvider>
+        </CitiesProvider>
       </ArticlesProvider>
     </MessagesProvider>
   );

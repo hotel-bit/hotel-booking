@@ -17,7 +17,7 @@ export default function EditArticle({ params }) {
   const { id } = use(params);
   const locale = useLocale();
   const t = useTranslations("editArticle");
-    const c = useTranslations("common");
+  const c = useTranslations("common");
   const { articles, setArticles } = useArticles();
   const router = useRouter();
   const [activeLang, setActiveLang] = useState(locale || "en");
@@ -189,7 +189,7 @@ export default function EditArticle({ params }) {
               className="primaryButton text-center me-2"
               onClick={() => document.getElementById("ImgInput").click()}
             >
-              {article.image || newImage ? "Change" : "Add"}
+              {article.image || newImage ? c("change") : c("add")}
             </div>
           </div>
           <input
@@ -244,10 +244,10 @@ export default function EditArticle({ params }) {
                 role="status"
                 aria-hidden="true"
               ></span>
-              {t("updating")}
+              {c("updating")}
             </>
           ) : (
-            t("update")
+            c("update")
           )}
         </button>
       </form>

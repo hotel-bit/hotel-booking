@@ -15,7 +15,7 @@ export default function AddArticle() {
   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations("addArticle");
-    const c = useTranslations("common");
+  const c = useTranslations("common");
   const { articles, setArticles } = useArticles();
 
   const [activeLang, setActiveLang] = useState(locale || "en");
@@ -41,7 +41,7 @@ export default function AddArticle() {
 
   const handleChange = (field, value) => {
     if (field === "title" && value.includes("_")) {
-      setError(t("noUnderscores"));
+      setError(c("noUnderscores"));
       return;
     } else {
       setError("");
@@ -183,7 +183,7 @@ export default function AddArticle() {
               className="primaryButton text-center me-2"
               onClick={() => document.getElementById("ImgInput").click()}
             >
-              {article.image ? t("change") : t("add")}
+              {article.image ? c("change") : c("add")}
             </div>
           </div>
           <input
@@ -236,10 +236,10 @@ export default function AddArticle() {
                 role="status"
                 aria-hidden="true"
               ></span>
-              {t("adding")}
+              {c("adding")}
             </>
           ) : (
-            t("add")
+            c("add")
           )}
         </button>
       </form>

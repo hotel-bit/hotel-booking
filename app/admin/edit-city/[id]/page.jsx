@@ -206,7 +206,7 @@ export default function EditCity({ params }) {
               className="primaryButton text-center me-2"
               onClick={() => document.getElementById("ImgInput").click()}
             >
-              {city.image || newImage ? "Change" : "Add"}
+              {city.image || newImage ? c("change") : c("add")}
             </div>
           </div>
           <input
@@ -249,10 +249,10 @@ export default function EditCity({ params }) {
                 role="status"
                 aria-hidden="true"
               ></span>
-              {t("updating")}
+              {c("updating")}
             </>
           ) : (
-            t("update")
+            c("update")
           )}
         </button>
       </form>

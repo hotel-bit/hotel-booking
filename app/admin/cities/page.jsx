@@ -11,6 +11,7 @@ export default function Cities() {
   const locale = useLocale();
   const { cities, setCities, loading } = useCities();
   const t = useTranslations("cities");
+  const c = useTranslations("common");
 
   const handleDelete = async (id) => {
     if (!window.confirm(t("confirmDelete"))) return;
@@ -116,7 +117,7 @@ export default function Cities() {
                       locale === "en" ? "me-2" : "ms-2"
                     }`}
                     onClick={() => router.push(`/admin/edit-city/${city.id}`)}
-                    title={t("edit")}
+                    title={c("edit")}
                   >
                     <FaPencilAlt />
                   </div>
@@ -124,7 +125,7 @@ export default function Cities() {
                     className="btn btn-danger"
                     style={{ backgroundColor: "red" }}
                     onClick={() => handleDelete(city.id)}
-                    title={t("delete")}
+                    title={c("delete")}
                   >
                     <FaTrash />
                   </div>

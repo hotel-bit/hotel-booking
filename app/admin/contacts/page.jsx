@@ -10,6 +10,7 @@ import { useTranslations, useLocale } from "next-intl";
 export default function ContactsPage() {
   const locale = useLocale();
   const t = useTranslations("contacts");
+  const c = useTranslations("common");
   const { messages, setMessages, unreadMessages, loading } = useMessages();
   const [contacts, setContacts] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -260,6 +261,7 @@ export default function ContactsPage() {
                       <div
                         className="primaryButton d-inline-block py-1 px-2"
                         onClick={() => deleteMessage(message.id)}
+                        title={c("delete")}
                       >
                         <i className="fa fa-trash"></i>
                       </div>

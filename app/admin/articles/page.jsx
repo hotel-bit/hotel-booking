@@ -12,6 +12,7 @@ import { useTranslations, useLocale } from "next-intl";
 export default function Articles() {
   const locale = useLocale();
   const t = useTranslations("articles");
+  const c = useTranslations("common");
   const router = useRouter();
   const { articles, setArticles, loading } = useArticles();
 
@@ -78,7 +79,7 @@ export default function Articles() {
           style={{ borderRadius: "12px" }}
           onClick={() => router.push(`/admin/add-article`)}
         >
-          {t("add")}
+          {c("add")}
         </div>
       </div>
 
@@ -132,7 +133,7 @@ export default function Articles() {
                           className={`btn btn-primary ${
                             locale === "en" ? "me-2" : "ms-2"
                           }`}
-                          title={t("view")}
+                          title={c("view")}
                         >
                           <FaEye />
                         </div>
@@ -143,7 +144,7 @@ export default function Articles() {
                           onClick={() =>
                             router.push(`/admin/edit-article/${article.id}`)
                           }
-                          title={t("edit")}
+                          title={c("edit")}
                         >
                           <FaPencilAlt />
                         </div>
@@ -151,7 +152,7 @@ export default function Articles() {
                           className="btn btn-danger"
                           style={{ backgroundColor: "red" }}
                           onClick={() => handleDelete(article)}
-                          title={t("delete")}
+                          title={c("delete")}
                         >
                           <FaTrash />
                         </div>
