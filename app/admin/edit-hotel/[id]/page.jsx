@@ -1,34 +1,36 @@
 "use client";
 import React, { useState, useRef, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
-const JoditEditor = dynamic(() => import("jodit-react"), {
-  ssr: false,
-  loading: () => <p>Loading editor...</p>,
-});
-import { nanoid } from "nanoid";
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 import { toast } from "react-toastify";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useHotels } from "@/contexts/HotelsContext";
 import { useCities } from "@/contexts/CitiesContext";
 import Cropper from "react-easy-crop";
+import { nanoid } from "nanoid";
 
-export default function AddHotel() {
+import Loading from "@/components/Loading";
+
+export default function EditHotel() {
   const locale = useLocale();
   const router = useRouter();
-  const t = useTranslations("addHotel");
+  const { id } = useParams();
+  const t = useTranslations("editHotel");
   const c = useTranslations("common");
+  const a = useTranslations("addHotel");
   const { cities } = useCities();
   const { hotels, setHotels } = useHotels();
+
   const [activeLang, setActiveLang] = useState(locale || "en");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [imgUrl, setImgUrl] = useState("");
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setcroppedAreaPixels] = useState(null);
-
-  const [newHotel, setNewHotel] = useState({
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [originalHotel, setOriginalHotel] = useState(null);
+  const [hotel, setHotel] = useState({
     title: { en: "", ar: "" },
     address: { en: "", ar: "" },
     images: [],
@@ -36,11 +38,7 @@ export default function AddHotel() {
     rooms: [],
     terms: { en: "", ar: "" },
     brief: { en: "", ar: "" },
-    city: {
-      id: "",
-      en: "",
-      ar: "",
-    },
+    city: { id: "", en: "", ar: "" },
   });
 
   const briefEditor = useRef(null);
@@ -68,37 +66,34 @@ export default function AddHotel() {
   const handleSaveImage = () => {
     const tempCanvas = document.createElement("canvas");
     const ctx = tempCanvas.getContext("2d");
-
-    const x = croppedAreaPixels.x;
-    const y = croppedAreaPixels.y;
-    const width = croppedAreaPixels.width;
-    const height = croppedAreaPixels.height;
+    const { x, y, width, height } = croppedAreaPixels;
 
     tempCanvas.width = width;
     tempCanvas.height = height;
 
     const img = new Image();
     img.src = imgUrl;
-    ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
-
-    const croppedDataURL = tempCanvas.toDataURL("image/jpeg");
-    fetch(croppedDataURL)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const croppedImageFile = new File([blob], "city-image", {
-          type: "image/jpeg",
+    img.onload = () => {
+      ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
+      const croppedDataURL = tempCanvas.toDataURL("image/jpeg");
+      fetch(croppedDataURL)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const croppedImageFile = new File([blob], "hotel-image", {
+            type: "image/jpeg",
+          });
+          setHotel((prev) => ({
+            ...prev,
+            images: [
+              ...prev.images,
+              {
+                file: croppedImageFile,
+                preview: croppedDataURL,
+              },
+            ],
+          }));
         });
-        setNewHotel((prev) => ({
-          ...prev,
-          images: [
-            ...newHotel.images,
-            {
-              file: croppedImageFile,
-              preview: croppedDataURL,
-            },
-          ],
-        }));
-      });
+    };
     document.getElementById("closeModal").click();
   };
 
@@ -109,9 +104,8 @@ export default function AddHotel() {
     } else {
       setError("");
     }
-
     if (["title", "address", "terms", "brief"].includes(field)) {
-      setNewHotel((prev) => ({
+      setHotel((prev) => ({
         ...prev,
         [field]: {
           ...prev[field],
@@ -119,22 +113,19 @@ export default function AddHotel() {
         },
       }));
     } else {
-      setNewHotel((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
+      setHotel((prev) => ({ ...prev, [field]: value }));
     }
   };
 
   const removeImage = (index) => {
-    setNewHotel((prev) => ({
+    setHotel((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
   };
 
   const toggleService = (serviceEn, serviceAr) => {
-    setNewHotel((prev) => {
+    setHotel((prev) => {
       const alreadySelected = prev.services.en.includes(serviceEn);
       return {
         ...prev,
@@ -152,24 +143,23 @@ export default function AddHotel() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      if (newHotel.images.length === 0) {
-        toast.error(t("addImages"));
+      if (hotel.images.length === 0) {
+        toast.error(a("addImages"));
         return;
       }
-
       setLoading(true);
 
-      const hotelId = nanoid();
       const uploaded = [];
-
-      for (const img of newHotel.images) {
+      for (const img of hotel.images) {
+        if (img.url) {
+          uploaded.push(img);
+          continue;
+        }
         const formData = new FormData();
         const imgId = nanoid();
-        const path = `${hotelId}/main/${imgId}`;
         formData.append("file", img.file);
-        formData.append("id", path);
+        formData.append("id", `${id}/main/${imgId}`);
         formData.append("bucket", "zahid-hotel-images");
 
         const res = await fetch("/api/image", {
@@ -178,44 +168,56 @@ export default function AddHotel() {
         });
         if (!res.ok) throw new Error("Image upload failed");
         const data = await res.json();
-
-        uploaded.push({ url: data.url, path });
+        uploaded.push({ url: data.url, path: data.path });
       }
 
-      const timestamp = new Date().toISOString();
+      const removedImages = originalHotel.images.filter(
+        (oldImg) => !uploaded.some((newImg) => newImg.path === oldImg.path)
+      );
+      if (removedImages.length > 0) {
+        await Promise.all(
+          removedImages.map((img) =>
+            fetch("/api/image", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: img.path,
+                bucket: "zahid-hotel-images",
+              }),
+            }).catch((err) =>
+              console.warn(
+                "Failed to delete image from storage:",
+                img.path,
+                err
+              )
+            )
+          )
+        );
+      }
 
-      const hotelData = {
-        ...newHotel,
+      const updatedHotel = {
+        ...hotel,
         images: uploaded,
-        id: hotelId,
-        timestamp,
         tableName: "hotels",
+        id: hotel.id,
       };
 
-      const hotelRes = await fetch("/api/addItem", {
-        method: "POST",
+      const res = await fetch("/api/updateItem", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(hotelData),
+        body: JSON.stringify(updatedHotel),
       });
 
-      if (!hotelRes.ok) throw new Error("Failed to save hotel");
+      if (!res.ok) throw new Error("Failed to update hotel");
+
+      setHotels((prev) =>
+        prev.map((h) => (h.id === hotel.id ? updatedHotel : h))
+      );
 
       toast.success(t("success"));
-      setHotels((prev) => [...prev, hotelData]);
-
-      setNewHotel({
-        title: { en: "", ar: "" },
-        address: { en: "", ar: "" },
-        images: [],
-        services: { en: [], ar: [] },
-        rooms: [],
-        terms: { en: "", ar: "" },
-        brief: { en: "", ar: "" },
-        city: { en: "", ar: "" },
-      });
       router.back();
-    } catch (error) {
-      console.error("Add hotel failed:", error);
+    } catch (err) {
+      console.error("Update failed:", err);
       toast.error(t("failed"));
     } finally {
       setLoading(false);
@@ -274,14 +276,32 @@ export default function AddHotel() {
   }, [locale]);
 
   useEffect(() => {
+    if (hotels.length > 0) {
+      const filteredHotel = hotels.find((h) => h.id === id);
+      if (filteredHotel) {
+        setHotel(filteredHotel);
+        setOriginalHotel(filteredHotel);
+      } else {
+        toast.error("Hotel not found.");
+      }
+    }
+  }, [id, hotels]);
+
+  useEffect(() => {
     const modal = document.getElementById("Modal");
-    modal.addEventListener("hidden.bs.modal", () => {
-      setZoom(1);
-      setCrop({ x: 0, y: 0 });
-      setcroppedAreaPixels(null);
-      setImgUrl("");
-    });
+    if (modal) {
+      modal.addEventListener("hidden.bs.modal", () => {
+        setZoom(1);
+        setCrop({ x: 0, y: 0 });
+        setCroppedAreaPixels(null);
+        setImgUrl("");
+      });
+    }
   }, []);
+
+  if (!originalHotel) {
+    return <Loading />;
+  }
 
   return (
     <div
@@ -305,15 +325,14 @@ export default function AddHotel() {
           <option value="ar">العربية</option>
         </select>
       </div>
-
       <form onSubmit={handleSubmit} className="w-md-75">
         <div className="mb-4">
-          <label className="form-label fw-bold mb-3">{t("images")}</label>
+          <label className="form-label fw-bold mb-3">{a("images")}</label>
           <div className="d-flex flex-wrap gap-3 mb-3">
-            {newHotel.images.map((img, i) => (
+            {hotel.images.map((img, i) => (
               <div key={i} style={{ position: "relative" }}>
                 <img
-                  src={img.preview}
+                  src={img.url || img.preview}
                   alt="preview"
                   style={{
                     width: 120,
@@ -353,11 +372,11 @@ export default function AddHotel() {
         </div>
 
         <div className="mb-4">
-          <label className="form-label fw-bold">{t("title")}</label>
+          <label className="form-label fw-bold">{a("title")}</label>
           <input
             type="text"
             className="form-control"
-            value={newHotel.title[activeLang]}
+            value={hotel.title[activeLang]}
             onChange={(e) => handleChange("title", e.target.value)}
             required
             dir={activeLang === "ar" ? "rtl" : "ltr"}
@@ -366,14 +385,14 @@ export default function AddHotel() {
         </div>
 
         <div className="mb-4">
-          <label className="form-label fw-bold">{t("city")}</label>
+          <label className="form-label fw-bold">{a("city")}</label>
           <select
             className="form-select"
-            value={newHotel.city.id}
+            value={hotel.city.id}
             onChange={(e) => {
               const cityId = e.target.value;
               const selectedCity = cities.find((c) => c.id === cityId);
-              setNewHotel((prev) => ({
+              setHotel((prev) => ({
                 ...prev,
                 city: {
                   id: selectedCity.id,
@@ -384,7 +403,7 @@ export default function AddHotel() {
             }}
             dir={activeLang === "ar" ? "rtl" : "ltr"}
           >
-            <option defaultValue="">{t("selectCity")}</option>
+            <option defaultValue="">{a("selectCity")}</option>
             {cities.map((city) => (
               <option key={city.id} value={city.id}>
                 {city.title[activeLang]}
@@ -394,11 +413,11 @@ export default function AddHotel() {
         </div>
 
         <div className="mb-4">
-          <label className="form-label fw-bold">{t("address")}</label>
+          <label className="form-label fw-bold">{a("address")}</label>
           <input
             type="text"
             className="form-control"
-            value={newHotel.address[activeLang]}
+            value={hotel.address[activeLang]}
             onChange={(e) => handleChange("address", e.target.value)}
             required
             dir={activeLang === "ar" ? "rtl" : "ltr"}
@@ -406,18 +425,18 @@ export default function AddHotel() {
         </div>
 
         <div className="mb-4">
-          <label className="form-label fw-bold">{t("brief")}</label>
+          <label className="form-label fw-bold">{a("brief")}</label>
           <JoditEditor
             ref={briefEditor}
             config={config}
-            value={newHotel.brief[activeLang]}
+            value={hotel.brief[activeLang]}
             tabIndex={1}
             onBlur={(newContent) => handleChange("brief", newContent)}
             onChange={() => {}}
           />
         </div>
         <div className="mb-4">
-          <label className="form-label fw-bold">{t("services")}</label>
+          <label className="form-label fw-bold">{a("services")}</label>
           <div className="row">
             {availableServices.en.map((srv, i) => (
               <div key={srv} className="col-12 col-sm-6 col-md-4 col-xl-3 mb-2">
@@ -426,7 +445,7 @@ export default function AddHotel() {
                     type="checkbox"
                     id={`srv-${srv}`}
                     className="form-check-input"
-                    checked={newHotel.services.en.includes(srv)}
+                    checked={hotel.services.en.includes(srv)}
                     onChange={() => toggleService(srv, availableServices.ar[i])}
                   />
                   <label htmlFor={`srv-${srv}`} className="form-check-label">
@@ -439,11 +458,11 @@ export default function AddHotel() {
         </div>
 
         <div className="mb-5">
-          <label className="form-label fw-bold">{t("terms")}</label>
+          <label className="form-label fw-bold">{a("terms")}</label>
           <JoditEditor
             ref={termsEditor}
             config={config}
-            value={newHotel.terms[activeLang]}
+            value={hotel.terms[activeLang]}
             tabIndex={1}
             onBlur={(newContent) => handleChange("terms", newContent)}
             onChange={() => {}}
@@ -465,10 +484,10 @@ export default function AddHotel() {
                 role="status"
                 aria-hidden="true"
               ></span>
-              {c("adding")}
+              {c("updating")}
             </>
           ) : (
-            c("add")
+            c("update")
           )}
         </button>
       </form>
@@ -501,7 +520,7 @@ export default function AddHotel() {
                   onCropChange={setCrop}
                   onZoomChange={setZoom}
                   onCropComplete={(croppedArea, croppedAreaPixels) =>
-                    setcroppedAreaPixels(croppedAreaPixels)
+                    setCroppedAreaPixels(croppedAreaPixels)
                   }
                 />
               </div>

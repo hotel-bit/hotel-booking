@@ -11,35 +11,38 @@ export default function Hotels() {
   const t = useTranslations("hotels");
   const c = useTranslations("common");
   const { hotels, setHotels, loading } = useHotels();
+  const [deletingIds, setDeletingIds] = React.useState([]);
 
-  const handleDelete = async (hotel) => {
+  const handleDelete = async (id) => {
     if (!confirm(t("confirmDelete"))) return;
 
     try {
-      for (const img of hotel.images) {
-        await fetch("/api/image", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            bucket: "zahid-hotel-images",
-            path: img.path,
-          }),
-        });
-      }
+      setDeletingIds((prev) => [...prev, id]);
+
+      await fetch("/api/deleteFolder", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bucket: "zahid-hotel-images",
+          folder: `${id}/`,
+        }),
+      });
 
       const res = await fetch("/api/deleteItem", {
-        method: "POST",
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: hotel.id, tableName: "hotels" }),
+        body: JSON.stringify({ id, tableName: "hotels" }),
       });
 
       if (!res.ok) throw new Error("Failed to delete hotel");
 
       toast.success(t("deletedSuccess"));
-      setHotels((prev) => prev.filter((h) => h.id !== hotel.id));
+      setHotels((prev) => prev.filter((h) => h.id !== id));
     } catch (err) {
       console.error(err);
       toast.error(t("deletedFail"));
+    } finally {
+      setDeletingIds((prev) => prev.filter((hid) => hid !== id));
     }
   };
 
@@ -101,12 +104,28 @@ export default function Hotels() {
                       key={i}
                       className={`carousel-item ${i === 0 ? "active" : ""}`}
                     >
-                      <img
-                        src={img.url}
-                        className="d-block w-100"
-                        alt={`hotel-${i}`}
-                        style={{ height: "150px", objectFit: "cover" }}
-                      />
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "100%",
+                          aspectRatio: "16/9",
+                          backgroundColor: "#f0f0f0",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <img
+                          src={img.url}
+                          alt={`hotel-${i}`}
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                          }}
+                          loading="lazy"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -168,13 +187,26 @@ export default function Hotels() {
                 >
                   {t("rooms")}
                 </div>
-                <button className="btn btn-warning btn-sm mt-auto">
+                <button
+                  className="btn btn-warning btn-sm mt-auto"
+                  onClick={() => router.push(`/admin/edit-hotel/${hotel.id}`)}
+                >
                   {c("edit")}
                 </button>
                 <button
                   className="btn btn-danger btn-sm mt-auto"
-                  onClick={() => handleDelete(hotel)}
+                  onClick={() => handleDelete(hotel.id)}
+                  disabled={deletingIds.includes(hotel.id)}
                 >
+                  {deletingIds.includes(hotel.id) ? (
+                    <span
+                      className={`spinner-border spinner-border-sm ${
+                        locale === "en" ? "me-2" : "ms-2"
+                      }`}
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                  ) : null}
                   {c("delete")}
                 </button>
               </div>

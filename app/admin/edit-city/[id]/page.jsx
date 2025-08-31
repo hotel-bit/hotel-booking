@@ -119,6 +119,7 @@ export default function EditCity({ params }) {
       if (!cityRes.ok) throw new Error("Failed to update city");
 
       toast.success(t("success"));
+      setCities((prev) => prev.map((c) => (c.id === city.id ? cityData : c)));
       setNewImage(null);
       router.back();
     } catch (error) {

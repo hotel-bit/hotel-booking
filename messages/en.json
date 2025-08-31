@@ -51,9 +51,15 @@
     "brief": "About Hotel",
     "services": "Services",
     "terms": "Terms",
-    "success": "Hotel uploaded successfully."
+    "success": "Hotel uploaded successfully.",
+    "city": "City",
+    "selectCity": "Select city"
   },
-  "editHotel": {},
+  "editHotel": {
+    "pageTitle": "Edit Hotel",
+    "success": "Hotel updated successfully",
+    "failed":"Failed to update the hotel"
+  },
   "rooms": {
     "title": "Rooms",
     "add": "Add Room"
