@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 export default function AddCity() {
   const { cities, setCities } = useCities();
   const t = useTranslations("addCity");
-    const c = useTranslations("common");
+  const c = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
   const [activeLang, setActiveLang] = useState(locale || "en");
@@ -79,7 +79,7 @@ export default function AddCity() {
 
     try {
       if (!newCity.image) {
-        toast.error(t("addImage"));
+        toast.error(c("addImage"));
         return;
       }
 

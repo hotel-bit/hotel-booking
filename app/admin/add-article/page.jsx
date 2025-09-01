@@ -79,7 +79,7 @@ export default function AddArticle() {
 
     try {
       if (!article.image) {
-        toast.error(t("addImage"));
+        toast.error(c("addImage"));
         return;
       }
 

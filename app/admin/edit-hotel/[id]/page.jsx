@@ -158,8 +158,9 @@ export default function EditHotel() {
         }
         const formData = new FormData();
         const imgId = nanoid();
+        const path = `${id}/main/${imgId}`;
         formData.append("file", img.file);
-        formData.append("id", `${id}/main/${imgId}`);
+        formData.append("id", path);
         formData.append("bucket", "zahid-hotel-images");
 
         const res = await fetch("/api/image", {
@@ -168,7 +169,7 @@ export default function EditHotel() {
         });
         if (!res.ok) throw new Error("Image upload failed");
         const data = await res.json();
-        uploaded.push({ url: data.url, path: data.path });
+        uploaded.push({ url: data.url, path });
       }
 
       const removedImages = originalHotel.images.filter(

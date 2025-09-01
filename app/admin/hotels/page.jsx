@@ -28,10 +28,10 @@ export default function Hotels() {
         }),
       });
 
-      const res = await fetch("/api/deleteItem", {
+      const res = await fetch("/api/deleteHotel", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, tableName: "hotels" }),
+        body: JSON.stringify({ hotelId: id }),
       });
 
       if (!res.ok) throw new Error("Failed to delete hotel");

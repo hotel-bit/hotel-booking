@@ -16,6 +16,8 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
+import BedOutlinedIcon from "@mui/icons-material/BedOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 
 import Loading from "@/components/Loading";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -56,6 +58,16 @@ export default function AdminAccount({ children }) {
       key: "cities",
       url: "/admin/cities",
       icon: <LocationCityIcon />,
+    },
+    {
+      key: "roomTypes",
+      url: "/admin/room-types",
+      icon: <BedOutlinedIcon />,
+    },
+    {
+      key: "roomViews",
+      url: "/admin/room-views",
+      icon: <VisibilityOutlinedIcon />,
     },
     {
       key: "articles",
