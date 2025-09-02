@@ -134,6 +134,28 @@
     "success": "Article updated successfully.",
     "error": "An error occurred while updating the article."
   },
+  "profile": {
+    "profile": "Profile",
+    "edit": "Edit Profile",
+    "name": "Name",
+    "email": "Email"
+  },
+  "changeEmail": {
+    "title": "Change Email",
+    "description": "A verification link will be sent to your new email",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter new email",
+    "sendButton": "Send",
+    "successMessage": "Email verification link has been sent to {email}"
+  },
+  "changePassword": {
+    "title": "Change Password",
+    "description": "A password reset link will be sent to the email",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter email",
+    "sendButton": "Send",
+    "successMessage": "Password reset link has been sent to {email}"
+  },
   "common": {
     "langSelect": "Select Content Language",
     "add": "Add",

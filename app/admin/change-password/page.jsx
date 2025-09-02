@@ -1,45 +1,16 @@
 "use client";
-import React, { useState, use } from "react";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "@/configuration/firebase-config";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { useLocale, useTranslations } from "next-intl";
 
-export default function ChangePassword({ params }) {
-  const { lang } = use(params);
+export default function ChangePassword() {
+  const locale = useLocale();
   const [email, setEmail] = useState("");
 
-  const translations = {
-    en: {
-      title: "Change Password",
-      description: "A password reset link will be sent to the email",
-      emailLabel: "Email",
-      emailPlaceholder: "Enter email",
-      sendButton: "Send",
-      successMessage: (email) =>
-        `Password reset link has been sent to ${email}`,
-    },
-    ar: {
-      title: "تغيير كلمة المرور",
-      description:
-        "سيتم إرسال رابط إعادة تعيين كلمة المرور إلى البريد الإلكتروني",
-      emailLabel: "البريد الإلكتروني",
-      emailPlaceholder: "أدخل البريد الإلكتروني",
-      sendButton: "إرسال",
-      successMessage: (email) =>
-        `تم إرسال رابط إعادة تعيين كلمة المرور إلى ${email}`,
-    },
-  };
-
-  const t = translations[lang] || translations.en;
+  const t = useTranslations("changePassword");
 
   const handleChangePassword = (e) => {
     e.preventDefault();
-    sendPasswordResetEmail(auth, email)
-      .then(() => {
-        toast.success(t.successMessage(email));
-        setEmail("");
-      })
-      .catch((error) => toast.error(error.message));
   };
 
   return (

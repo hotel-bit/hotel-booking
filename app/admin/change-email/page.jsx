@@ -1,45 +1,16 @@
 "use client";
 import React, { useState } from "react";
-import { use } from "react";
-import { verifyBeforeUpdateEmail } from "firebase/auth";
-import useAuth from "@/hooks/UseAuth";
 import { toast } from "react-toastify";
+import { useLocale, useTranslations } from "next-intl";
 
-export default function ChangeEmail({ params }) {
-  const { lang } = use(params);
-  const { user } = useAuth();
+export default function ChangeEmail() {
+  const locale = useLocale();
   const [email, setEmail] = useState("");
 
-  const translations = {
-    en: {
-      title: "Change Email",
-      description: "A verification link will be sent to your new email",
-      emailLabel: "Email",
-      emailPlaceholder: "Enter new email",
-      sendButton: "Send",
-      successMessage: (email) =>
-        `Email verification link has been sent to ${email}`,
-    },
-    ar: {
-      title: "تغيير البريد الإلكتروني",
-      description: "سيتم إرسال رابط التحقق إلى بريدك الإلكتروني الجديد",
-      emailLabel: "البريد الإلكتروني",
-      emailPlaceholder: "أدخل البريد الإلكتروني الجديد",
-      sendButton: "إرسال",
-      successMessage: (email) => `تم إرسال رابط التحقق إلى ${email}`,
-    },
-  };
-
-  const t = translations[lang] || translations.en;
+  const t = useTranslations("changeEmail");
 
   const handleChangeEmail = (e) => {
     e.preventDefault();
-    verifyBeforeUpdateEmail(user, email)
-      .then(() => {
-        toast.success(t.successMessage(email));
-        setEmail("");
-      })
-      .catch((error) => toast.error(error.message));
   };
 
   return (

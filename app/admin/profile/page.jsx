@@ -1,31 +1,12 @@
 "use client";
-import React, { useContext, use } from "react";
-import { Context } from "@/providers/ContextProvider";
 import { useRouter } from "next/navigation";
-import useAuth from "@/hooks/UseAuth";
+import { useLocale, useTranslations } from "next-intl";
 
-export default function AdminProfile({ params }) {
-  const { lang } = use(params);
-  const { user } = useAuth();
-  const { profileData } = useContext(Context);
+export default function AdminProfile() {
   const router = useRouter();
+  const locale = useLocale();
 
-  const translations = {
-    en: {
-      profile: "Profile",
-      edit: "Edit Profile",
-      name: "Name",
-      email: "Email",
-    },
-    ar: {
-      profile: "الملف الشخصي",
-      edit: "تعديل الملف الشخصي",
-      name: "الاسم",
-      email: "البريد الإلكتروني",
-    },
-  };
-
-  const t = translations[lang] || translations.en;
+  const t = useTranslations("profile");
 
   return (
     <div
@@ -51,14 +32,14 @@ export default function AdminProfile({ params }) {
         <div style={{ width: "120px", fontWeight: 500, color: "#6c757d" }}>
           {t.name}:
         </div>
-        <div>{profileData.name}</div>
+        {/*<div>{profileData.name}</div>*/}
       </div>
 
       <div className="mb-3 d-flex">
         <div style={{ width: "120px", fontWeight: 500, color: "#6c757d" }}>
           {t.email}:
         </div>
-        <div>{user?.email}</div>
+        {/*<div>{user?.email}</div>*/}
       </div>
     </div>
   );
