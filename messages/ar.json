@@ -94,7 +94,10 @@
     "noOfRooms": "عدد الغرف",
     "image": "صورة الغرفة"
   },
-  "editRoom": {},
+  "editRoom": {
+    "pageTitle": "تعديل الغرفة",
+    "updateSuccess": "تم تحديث الغرفة بنجاح"
+  },
   "contacts": {
     "title": "جهات الاتصال",
     "searchPlaceholder": "ابحث بالاسم",

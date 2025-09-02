@@ -4,14 +4,17 @@ import { DeleteCommand } from "@aws-sdk/lib-dynamodb";
 
 export async function DELETE(req) {
   try {
-    const { tableName, id } = await req.json();
+    const { tableName, id, sk } = await req.json();
 
     if (!tableName || !id) throw new Error("Table name and ID are required");
+
+    const key = { id };
+    if (sk) key.sk = sk;
 
     await dynamoDb.send(
       new DeleteCommand({
         TableName: tableName,
-        Key: { id },
+        Key: key,
       })
     );
 

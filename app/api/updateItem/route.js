@@ -4,7 +4,7 @@ import { UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 export async function PATCH(req) {
   try {
-    const { tableName, id, ...updatedFields } = await req.json();
+    const { tableName, id, sk, ...updatedFields } = await req.json();
 
     if (!tableName || !id || Object.keys(updatedFields).length === 0) {
       throw new Error("Table name, ID, and updated fields are required");
@@ -23,10 +23,12 @@ export async function PATCH(req) {
       expressionAttributeNames[`#${key}`] = key;
     }
 
+    const Key = sk ? { id, sk } : { id };
+
     await dynamoDb.send(
       new UpdateCommand({
         TableName: tableName,
-        Key: { id },
+        Key,
         UpdateExpression: "SET " + updateExpression.join(", "),
         ExpressionAttributeNames: expressionAttributeNames,
         ExpressionAttributeValues: expressionAttributeValues,

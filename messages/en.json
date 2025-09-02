@@ -94,7 +94,10 @@
     "noOfRooms": "No. of rooms",
     "image": "Room image"
   },
-  "editRoom": {},
+  "editRoom": {
+    "pageTitle": "Edit Room",
+    "updateSuccess": "Room updated successfully"
+  },
   "contacts": {
     "title": "Contacts",
     "searchPlaceholder": "Search by name",

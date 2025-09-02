@@ -35,26 +35,35 @@ export default function Rooms() {
     }
   }, [hotelId]);
 
-  //remaining deletion of a room
-  const handleDelete = async (roomId) => {
+  const handleDelete = async (sk) => {
     if (!confirm(t("confirmDelete"))) return;
 
     try {
-      setDeletingIds((prev) => [...prev, roomId]);
+      setDeletingIds((prev) => [...prev, sk]);
+
+      await fetch("/api/deleteFolder", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bucket: "zahid-hotel-images",
+          folder: `${hotelId}/rooms/`,
+        }),
+      });
+
       const res = await fetch("/api/deleteItem", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: roomId, tableName: "rooms" }),
+        body: JSON.stringify({ tableName: "rooms", id: hotelId, sk }),
       });
       if (!res.ok) throw new Error("Failed to delete room");
 
       toast.success(t("deletedSuccess"));
-      setRooms((prev) => prev.filter((r) => r.roomId !== roomId));
+      setRooms((prev) => prev.filter((r) => r.sk !== sk));
     } catch (err) {
       console.error(err);
       toast.error(t("deletedFail"));
     } finally {
-      setDeletingIds((prev) => prev.filter((id) => id !== roomId));
+      setDeletingIds((prev) => prev.filter((id) => id !== sk));
     }
   };
 
@@ -96,7 +105,7 @@ export default function Rooms() {
         >
           {rooms.map((room) => (
             <div
-              key={room.roomId}
+              key={room.sk}
               style={{
                 border: "1px solid #e3e3e3",
                 borderRadius: "12px",
@@ -139,17 +148,17 @@ export default function Rooms() {
                 <button
                   className="btn btn-warning btn-sm mt-auto"
                   onClick={() =>
-                    router.push(`/admin/edit-room/${hotelId}/${room.roomId}`)
+                    router.push(`/admin/edit-room/${hotelId}/${room.sk}`)
                   }
                 >
                   {c("edit")}
                 </button>
                 <button
                   className="btn btn-danger btn-sm mt-auto"
-                  onClick={() => handleDelete(room.roomId)}
-                  disabled={deletingIds.includes(room.roomId)}
+                  onClick={() => handleDelete(room.sk)}
+                  disabled={deletingIds.includes(room.sk)}
                 >
-                  {deletingIds.includes(room.roomId) ? (
+                  {deletingIds.includes(room.sk) ? (
                     <span
                       className={`spinner-border spinner-border-sm ${
                         locale === "en" ? "me-2" : "ms-2"

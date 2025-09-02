@@ -4,14 +4,15 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter, useParams } from "next/navigation";
 import { useViews } from "@/contexts/ViewsContext";
 import { useRoomTypes } from "@/contexts/RoomTypesContext";
-import { nanoid } from "nanoid";
 import Cropper from "react-easy-crop";
 import { toast } from "react-toastify";
+import Loading from "@/components/Loading";
 
-export default function AddRoom() {
+export default function EditRoom() {
   const params = useParams();
-  const { id: hotelId } = params;
-  const t = useTranslations("addRoom");
+  const { hotelId, roomId } = params;
+  const t = useTranslations("editRoom");
+  const a = useTranslations("addRoom");
   const c = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
@@ -21,24 +22,37 @@ export default function AddRoom() {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setcroppedAreaPixels] = useState(null);
-  const [newRoom, setNewRoom] = useState({
-    type: { en: "", ar: "" },
-    maxGuest: 1,
-    noOfBeds: 1,
-    pricePerNight: 0,
-    noOfRooms: 1,
-    view: { en: "", ar: "" },
-    image: null,
-    imagePreview: "",
-  });
+  const [newImage, setNewImage] = useState(null);
 
+  const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const fetchRoom = async () => {
+      try {
+        const res = await fetch("/api/fetchRoom", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: hotelId, sk: roomId }),
+        });
+
+        const data = await res.json();
+        setRoom(data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load room details");
+      }
+    };
+    if (hotelId && roomId) {
+      fetchRoom();
+    }
+  }, [hotelId, roomId]);
+
   const handleImageSelect = (e) => {
-    const selectedFile = event.target.files[0];
+    const selectedFile = e.target.files[0];
     if (selectedFile && selectedFile.type.startsWith("image/")) {
       setImgUrl(URL.createObjectURL(selectedFile));
-      event.target.value = "";
+      e.target.value = "";
       document.getElementById("openModal").click();
     }
   };
@@ -47,75 +61,73 @@ export default function AddRoom() {
     const tempCanvas = document.createElement("canvas");
     const ctx = tempCanvas.getContext("2d");
 
-    const x = croppedAreaPixels.x;
-    const y = croppedAreaPixels.y;
-    const width = croppedAreaPixels.width;
-    const height = croppedAreaPixels.height;
-
+    const { x, y, width, height } = croppedAreaPixels;
     tempCanvas.width = width;
     tempCanvas.height = height;
 
     const img = new Image();
     img.src = imgUrl;
-    ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
+    img.onload = () => {
+      ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
 
-    const croppedDataURL = tempCanvas.toDataURL("image/jpeg");
-    fetch(croppedDataURL)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const croppedImageFile = new File([blob], "city-image", {
-          type: "image/jpeg",
+      const croppedDataURL = tempCanvas.toDataURL("image/jpeg");
+      fetch(croppedDataURL)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const croppedImageFile = new File([blob], "room-image", {
+            type: "image/jpeg",
+          });
+          setNewImage(croppedImageFile);
+          setRoom((prev) => ({
+            ...prev,
+            image: { ...room.image, url: "" },
+          }));
         });
-        setNewRoom((prev) => ({
-          ...prev,
-          image: croppedImageFile,
-          imagePreview: URL.createObjectURL(croppedImageFile),
-        }));
-      });
+    };
     document.getElementById("closeModal").click();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!newRoom.image) {
-      toast.error(c("addImage"));
-      return;
-    }
+    if (!room) return;
 
     try {
       setLoading(true);
-      const formData = new FormData();
-      const imgId = nanoid();
-      const path = `${hotelId}/rooms/${imgId}`;
-      formData.append("file", newRoom.image);
-      formData.append("id", path);
-      formData.append("bucket", "zahid-hotel-images");
+      let imageData = { ...room.image };
 
-      const imgRes = await fetch("/api/image", {
-        method: "POST",
-        body: formData,
-      });
-      if (!imgRes.ok) throw new Error("Image upload failed");
-      const data = await imgRes.json();
+      if (newImage) {
+        const formData = new FormData();
+        formData.append("file", newImage);
+        formData.append("id", imageData.path);
+        formData.append("bucket", "zahid-hotel-images");
 
-      const roomData = {
-        ...newRoom,
-        image: { url: data.url, path },
+        const imgRes = await fetch("/api/image", {
+          method: "POST",
+          body: formData,
+        });
+        if (!imgRes.ok) throw new Error("Image upload failed");
+
+        const data = await imgRes.json();
+        imageData.url = data.url;
+      }
+
+      const updatedRoom = {
+        ...room,
+        image: imageData,
         id: hotelId,
-        sk: imgId,
+        sk: roomId,
         tableName: "rooms",
       };
 
-      const res = await fetch("/api/addItem", {
-        method: "POST",
+      const res = await fetch("/api/updateItem", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(roomData),
+        body: JSON.stringify(updatedRoom),
       });
 
-      if (!res.ok) throw new Error("Failed to save room");
+      if (!res.ok) throw new Error("Failed to update room");
 
-      toast.success(c("saveSuccess"));
+      toast.success(t("updateSuccess"));
       router.back();
     } catch (err) {
       console.error(err);
@@ -127,13 +139,17 @@ export default function AddRoom() {
 
   useEffect(() => {
     const modal = document.getElementById("Modal");
-    modal.addEventListener("hidden.bs.modal", () => {
-      setZoom(1);
-      setCrop({ x: 0, y: 0 });
-      setcroppedAreaPixels(null);
-      setImgUrl("");
-    });
+    if (modal) {
+      modal.addEventListener("hidden.bs.modal", () => {
+        setZoom(1);
+        setCrop({ x: 0, y: 0 });
+        setcroppedAreaPixels(null);
+        setImgUrl("");
+      });
+    }
   }, []);
+
+  if (!room) return <Loading />;
 
   return (
     <div
@@ -148,8 +164,7 @@ export default function AddRoom() {
 
       <form onSubmit={handleSubmit} className="w-md-75">
         <div className="mb-3">
-          <label className="form-label">{t("image")}</label>
-
+          <label className="form-label">{a("image")}</label>
           <input
             type="file"
             accept="image/*"
@@ -157,10 +172,9 @@ export default function AddRoom() {
             style={{ display: "none" }}
             onChange={handleImageSelect}
           />
-
-          {newRoom.imagePreview && (
+          {(room.image?.url || newImage) && (
             <img
-              src={newRoom.imagePreview}
+              src={room.image.url || URL.createObjectURL(newImage)}
               alt="preview"
               style={{
                 width: 200,
@@ -175,18 +189,18 @@ export default function AddRoom() {
             className="primaryButton border-0 rounded"
             onClick={() => document.getElementById("roomImageInput").click()}
           >
-            {newRoom.image ? c("change") : c("add")}
+            {c("change")}
           </button>
         </div>
 
         <div className="mb-3">
-          <label className="form-label">{t("roomType")}</label>
+          <label className="form-label">{a("roomType")}</label>
           <select
             className="form-select"
-            value={newRoom.type.en}
+            value={room.type?.en || ""}
             onChange={(e) =>
-              setNewRoom({
-                ...newRoom,
+              setRoom({
+                ...room,
                 type: {
                   en: e.target.value,
                   ar:
@@ -198,7 +212,7 @@ export default function AddRoom() {
             name="type"
             required
           >
-            <option value="">{t("selectType")}</option>
+            <option value="">{a("selectType")}</option>
             {roomTypes.map((rt) => (
               <option key={rt.id} value={rt.title.en}>
                 {rt.title[locale]}
@@ -208,14 +222,14 @@ export default function AddRoom() {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">{t("view")}</label>
+          <label className="form-label">{a("view")}</label>
           <select
             className="form-select"
-            value={newRoom.view.id || ""}
+            value={room.view?.id || ""}
             onChange={(e) => {
               const selectedView = views.find((v) => v.id === e.target.value);
-              setNewRoom({
-                ...newRoom,
+              setRoom({
+                ...room,
                 view: {
                   id: selectedView?.id || "",
                   en: selectedView?.title.en || "",
@@ -225,7 +239,7 @@ export default function AddRoom() {
             }}
             name="view"
           >
-            <option value="">{t("selectView")}</option>
+            <option value="">{a("selectView")}</option>
             {views.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.title[locale]}
@@ -235,64 +249,57 @@ export default function AddRoom() {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">{t("maxGuest")}</label>
+          <label className="form-label">{a("maxGuest")}</label>
           <input
             type="number"
             min={1}
             className="form-control"
-            value={newRoom.maxGuest}
+            value={room.maxGuest}
             onChange={(e) =>
-              setNewRoom({ ...newRoom, maxGuest: parseInt(e.target.value) })
+              setRoom({ ...room, maxGuest: parseInt(e.target.value) })
             }
-            name="maxGuest"
             required
           />
         </div>
 
         <div className="mb-3">
-          <label className="form-label">{t("noOfBeds")}</label>
+          <label className="form-label">{a("noOfBeds")}</label>
           <input
             type="number"
             min={1}
             className="form-control"
-            value={newRoom.noOfBeds}
+            value={room.noOfBeds}
             onChange={(e) =>
-              setNewRoom({ ...newRoom, noOfBeds: parseInt(e.target.value) })
+              setRoom({ ...room, noOfBeds: parseInt(e.target.value) })
             }
-            name="noOfBeds"
             required
           />
         </div>
 
         <div className="mb-3">
-          <label className="form-label">{t("pricePerNight")}</label>
+          <label className="form-label">{a("pricePerNight")}</label>
           <input
             type="number"
             min={0}
             className="form-control"
-            value={newRoom.pricePerNight}
+            value={room.pricePerNight}
             onChange={(e) =>
-              setNewRoom({
-                ...newRoom,
-                pricePerNight: e.target.value,
-              })
+              setRoom({ ...room, pricePerNight: parseInt(e.target.value) })
             }
-            name="pricePerNight"
             required
           />
         </div>
 
         <div className="mb-3">
-          <label className="form-label">{t("noOfRooms")}</label>
+          <label className="form-label">{a("noOfRooms")}</label>
           <input
             type="number"
             min={1}
             className="form-control"
-            value={newRoom.noOfRooms}
+            value={room.noOfRooms}
             onChange={(e) =>
-              setNewRoom({ ...newRoom, noOfRooms: parseInt(e.target.value) })
+              setRoom({ ...room, noOfRooms: parseInt(e.target.value) })
             }
-            name="noOfRooms"
             required
           />
         </div>
@@ -311,10 +318,10 @@ export default function AddRoom() {
               aria-hidden="true"
             ></span>
           ) : null}
-          {loading ? c("adding") : c("add")}
+          {loading ? c("updating") : c("update")}
         </button>
       </form>
-      {/* Image Modal */}
+
       <button
         id="openModal"
         className="d-none"

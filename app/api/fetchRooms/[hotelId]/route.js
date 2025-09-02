@@ -16,9 +16,9 @@ export async function GET(req, { params }) {
     const result = await dynamoDb.send(
       new QueryCommand({
         TableName: "rooms",
-        KeyConditionExpression: "hotelId = :hotelId",
+        KeyConditionExpression: "id = :id",
         ExpressionAttributeValues: {
-          ":hotelId": hotelId,
+          ":id": hotelId,
         },
       })
     );
