@@ -102,7 +102,7 @@ export default function Articles() {
                       style={{
                         position: "relative",
                         width: "100%",
-                        paddingTop: "83.83%",
+                        paddingTop: "56.25%",
                         backgroundColor: "#f0f0f0",
                         overflow: "hidden",
                       }}
