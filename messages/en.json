@@ -8,6 +8,9 @@
     "contacts": "Contacts",
     "admins": "Admins",
     "settings": "Settings",
+    "content": "Content",
+    "terms": "Terms",
+    "privacy": "Privacy",
     "profile": "Profile",
     "password": "Password",
     "email": "Email",
@@ -155,6 +158,15 @@
     "emailPlaceholder": "Enter email",
     "sendButton": "Send",
     "successMessage": "Password reset link has been sent to {email}"
+  },
+  "terms": {
+    "pageTitle": "Terms and Conditions",
+    "headline": "Headline",
+    "copy": "Copy",
+    "body": "Body"
+  },
+  "privacy": {
+    "pageTitle": "Privacy Policy"
   },
   "common": {
     "langSelect": "Select Content Language",

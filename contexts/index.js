@@ -6,19 +6,22 @@ import { CitiesProvider } from "./CitiesContext";
 import { HotelsProvider } from "./HotelsContext";
 import { RoomTypesProvider } from "./RoomTypesContext";
 import { ViewsProvider } from "./ViewsContext";
+import { ContentProvider } from "./ContentContext";
 
 export const AppProviders = ({ children }) => {
   return (
-    <MessagesProvider>
-      <ArticlesProvider>
-        <CitiesProvider>
-          <RoomTypesProvider>
-            <ViewsProvider>
-              <HotelsProvider>{children}</HotelsProvider>
-            </ViewsProvider>
-          </RoomTypesProvider>
-        </CitiesProvider>
-      </ArticlesProvider>
-    </MessagesProvider>
+    <ContentProvider>
+      <MessagesProvider>
+        <ArticlesProvider>
+          <CitiesProvider>
+            <RoomTypesProvider>
+              <ViewsProvider>
+                <HotelsProvider>{children}</HotelsProvider>
+              </ViewsProvider>
+            </RoomTypesProvider>
+          </CitiesProvider>
+        </ArticlesProvider>
+      </MessagesProvider>
+    </ContentProvider>
   );
 };

@@ -1,11 +1,12 @@
 "use client";
-import React, { useState, use } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { useLocale } from "next-intl";
 
-export default function AddAdmin({ params }) {
-  const { lang } = use(params);
+export default function AddAdmin() {
+  const locale = useLocale();
 
   const content = {
     en: {
@@ -36,7 +37,7 @@ export default function AddAdmin({ params }) {
     },
   };
 
-  const t = content[lang] || content.en;
+  const t = content[locale] || content.en;
   const [adminData, setAdminData] = useState({
     name: "",
     email: "",
@@ -134,7 +135,7 @@ export default function AddAdmin({ params }) {
           <label htmlFor="adminPassword" className="form-label">
             {t.password}
           </label>
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative", height: "100%" }}>
             <input
               type={visible ? "text" : "password"}
               className="form-control"
@@ -150,9 +151,10 @@ export default function AddAdmin({ params }) {
               <VisibilityIcon
                 style={{
                   position: "absolute",
-                  top: 7,
-                  right: lang === "en" ? 10 : "",
-                  left: lang === "ar" ? 10 : "",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  right: locale === "en" ? 10 : undefined,
+                  left: locale === "ar" ? 10 : undefined,
                   color: "rgba(134, 141, 151, 1)",
                   cursor: "pointer",
                 }}
@@ -162,9 +164,10 @@ export default function AddAdmin({ params }) {
               <VisibilityOffIcon
                 style={{
                   position: "absolute",
-                  top: 7,
-                  right: lang === "en" ? 10 : "",
-                  left: lang === "ar" ? 10 : "",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  right: locale === "en" ? 10 : undefined,
+                  left: locale === "ar" ? 10 : undefined,
                   color: "rgba(134, 141, 151, 1)",
                   cursor: "pointer",
                 }}
@@ -184,7 +187,7 @@ export default function AddAdmin({ params }) {
             <>
               <span
                 className={`spinner-border spinner-border-sm ${
-                  lang === "en" ? "me-2" : "ms-2"
+                  locale === "en" ? "me-2" : "ms-2"
                 }`}
                 role="status"
                 aria-hidden="true"

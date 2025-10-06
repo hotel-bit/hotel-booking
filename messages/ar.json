@@ -8,6 +8,9 @@
     "contacts": "جهات الاتصال",
     "admins": "المسؤولون",
     "settings": "الإعدادات",
+    "content": "المحتوى",
+    "terms": "الشروط",
+    "privacy": "الخصوصية",
     "profile": "الملف الشخصي",
     "password": "كلمة المرور",
     "email": "البريد الإلكتروني",
@@ -155,6 +158,15 @@
     "emailPlaceholder": "أدخل البريد الإلكتروني",
     "sendButton": "إرسال",
     "successMessage": "تم إرسال رابط إعادة تعيين كلمة المرور إلى {email}"
+  },
+  "terms": {
+    "pageTitle": "الشروط والأحكام",
+    "headline": "العنوان",
+    "copy": "النص",
+    "body": "المحتوى"
+  },
+  "privacy": {
+    "pageTitle": "سياسة الخصوصية"
   },
   "common": {
     "langSelect": "اختر لغة المحتوى",

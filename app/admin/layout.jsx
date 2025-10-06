@@ -18,6 +18,7 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import BedOutlinedIcon from "@mui/icons-material/BedOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import { DescriptionOutlined } from "@mui/icons-material";
 
 import Loading from "@/components/Loading";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -28,6 +29,7 @@ export default function AdminAccount({ children }) {
   const { unreadMessages } = useMessages();
   const pathName = usePathname();
   //  const { loading, user, isAdmin } = useAuth();
+  const [showContentDropdown, setShowContentDropdown] = useState(false);
   const [showSettingDropdown, setShowSettingDropdown] = useState(false);
 
   const handleLogout = async () => {
@@ -40,6 +42,10 @@ export default function AdminAccount({ children }) {
 
   const toggleSettingDropdown = () => {
     setShowSettingDropdown(!showSettingDropdown);
+  };
+
+  const toggleContentDropdown = () => {
+    setShowContentDropdown(!showContentDropdown);
   };
 
   const t = useTranslations("layout");
@@ -84,6 +90,32 @@ export default function AdminAccount({ children }) {
       key: "admins",
       url: "/admin/admins",
       icon: <SupervisorAccountIcon />,
+    },
+  ];
+
+  const contentSubPages = [
+    {
+      key: "privacy",
+      url: "/admin/content/privacy-policy",
+    },
+    {
+      key: "terms",
+      url: "/admin/content/terms-and-conditions",
+    },
+  ];
+
+  const settingsSubPages = [
+    {
+      key: "profile",
+      url: "/admin/profile",
+    },
+    {
+      key: "password",
+      url: "/admin/change-password",
+    },
+    {
+      key: "email",
+      url: "/admin/change-email",
     },
   ];
 
@@ -199,6 +231,51 @@ export default function AdminAccount({ children }) {
 
               <div
                 className={`${styles["account-nav-item"]} mb-1 mb-xl-2 cursor-pointer`}
+                onClick={toggleContentDropdown}
+              >
+                <DescriptionOutlined
+                  className={locale === "en" ? "me-3" : "ms-3"}
+                />
+                <h5 className="m-0 w-100">{t("content")}</h5>
+                {showContentDropdown === false ? (
+                  <ArrowDropDownSharpIcon />
+                ) : (
+                  <ArrowDropUpSharpIcon />
+                )}
+              </div>
+              <div>
+                {showContentDropdown && (
+                  <div
+                    style={{
+                      paddingLeft: locale === "en" ? "40px" : "",
+                      paddingRight: locale === "ar" ? "40px" : "",
+                    }}
+                  >
+                    {contentSubPages.map(({ key, url }) => (
+                      <div
+                        key={key}
+                        data-bs-dismiss="offcanvas"
+                        data-bs-target="#offcanvasMenu"
+                      >
+                        <Link
+                          className={`${
+                            styles["account-nav-item"]
+                          } mb-1 mb-xl-2 ${
+                            pathName === url ? styles["active-route"] : ""
+                          }`}
+                          href={url}
+                          style={{ fontWeight: "500" }}
+                        >
+                          {t(key)}
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div
+                className={`${styles["account-nav-item"]} mb-1 mb-xl-2 cursor-pointer`}
                 onClick={toggleSettingDropdown}
               >
                 <SettingsOutlinedIcon />
@@ -217,61 +294,31 @@ export default function AdminAccount({ children }) {
               </div>
               <div>
                 {showSettingDropdown && (
-                  <div style={{ paddingLeft: "40px" }}>
-                    <div
-                      data-bs-dismiss="offcanvas"
-                      data-bs-target="#offcanvasMenu"
-                    >
-                      <Link
-                        className={`${
-                          styles["account-nav-item"]
-                        } mb-1 mb-xl-2 ${
-                          pathName === `/admin/profile`
-                            ? styles["active-route"]
-                            : ""
-                        }`}
-                        href={`/admin/profile`}
-                        style={{ fontWeight: "500" }}
+                  <div
+                    style={{
+                      paddingLeft: locale === "en" ? "40px" : "",
+                      paddingRight: locale === "ar" ? "40px" : "",
+                    }}
+                  >
+                    {settingsSubPages.map(({ key, url }) => (
+                      <div
+                        key={key}
+                        data-bs-dismiss="offcanvas"
+                        data-bs-target="#offcanvasMenu"
                       >
-                        {t("profile")}
-                      </Link>
-                    </div>
-                    <div
-                      data-bs-dismiss="offcanvas"
-                      data-bs-target="#offcanvasMenu"
-                    >
-                      <Link
-                        className={`${
-                          styles["account-nav-item"]
-                        } mb-1 mb-xl-2 ${
-                          pathName === `/admin/change-password`
-                            ? styles["active-route"]
-                            : ""
-                        }`}
-                        href={`/admin/change-password`}
-                        style={{ fontWeight: "500" }}
-                      >
-                        {t("password")}
-                      </Link>
-                    </div>
-                    <div
-                      data-bs-dismiss="offcanvas"
-                      data-bs-target="#offcanvasMenu"
-                    >
-                      <Link
-                        className={`${
-                          styles["account-nav-item"]
-                        } mb-1 mb-xl-2 ${
-                          pathName === `/admin/change-email`
-                            ? styles["active-route"]
-                            : ""
-                        }`}
-                        href={`/admin/change-email`}
-                        style={{ fontWeight: "500" }}
-                      >
-                        {t("email")}
-                      </Link>
-                    </div>
+                        <Link
+                          className={`${
+                            styles["account-nav-item"]
+                          } mb-1 mb-xl-2 ${
+                            pathName === url ? styles["active-route"] : ""
+                          }`}
+                          href={url}
+                          style={{ fontWeight: "500" }}
+                        >
+                          {t(key)}
+                        </Link>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
